@@ -1,0 +1,134 @@
+{
+ "hero-aurelius": {
+  "file": "hero-aurelius-24e11ab3.mp4",
+  "poster": "hero-aurelius-5f3e3426.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 4,
+  "bytes": 483753,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "196a21bdf420392085110aef812dc000"
+ },
+ "aurelius-escalera": {
+  "file": "aurelius-escalera-22ea67d5.mp4",
+  "poster": "aurelius-escalera-ee3afda9.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 2.71,
+  "bytes": 672840,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "ad86a95e16d721385b8204515d8e9551"
+ },
+ "aurelius-sillon": {
+  "file": "aurelius-sillon-09b59818.mp4",
+  "poster": "aurelius-sillon-6dc4fadc.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 3,
+  "bytes": 298223,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "a93c88dc450e3212f14ad151250f944b"
+ },
+ "aryes-dron": {
+  "file": "aryes-dron-ebea8cef.mp4",
+  "poster": "aryes-dron-f83efb01.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 6.01,
+  "bytes": 1435670,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "69025f494ba1029d3239abdfab005b41"
+ },
+ "aryes-grua": {
+  "file": "aryes-grua-e5e80bd7.mp4",
+  "poster": "aryes-grua-f664247c.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 5.51,
+  "bytes": 453902,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "3db4b7b1aaab37004fffc23c33a96460"
+ },
+ "aryes-timelapse": {
+  "file": "aryes-timelapse-edf8a825.mp4",
+  "poster": "aryes-timelapse-0e6aedf6.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 7.01,
+  "bytes": 952356,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "9af7c9fccc1d244bd054b63d04f23a7c"
+ },
+ "aryes-reel": {
+  "file": "aryes-reel-dc71a9ad.mp4",
+  "poster": "aryes-reel-25ae9343.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 77.63,
+  "bytes": 10557919,
+  "audio": true,
+  "hdrSrc": "",
+  "sig": "8160406f897be896ca5feceb2ce77ac4"
+ },
+ "zambia-techo": {
+  "file": "zambia-techo-1070932e.mp4",
+  "poster": "zambia-techo-7a178b49.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 3.4,
+  "bytes": 615188,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "bc5177ad76bc785583adbbce73fe1036"
+ },
+ "zambia-losa": {
+  "file": "zambia-losa-9e5a2910.mp4",
+  "poster": "zambia-losa-4af81c48.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 5.4,
+  "bytes": 1567323,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "b3cbbc5810e250dae93e9283c6fd1d92"
+ },
+ "zambia-reel": {
+  "file": "zambia-reel-0b18bcec.mp4",
+  "poster": "zambia-reel-482be0e0.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 37.06,
+  "bytes": 11276028,
+  "audio": true,
+  "hdrSrc": "",
+  "sig": "db7a1be5439ba75d0f5ac310f45aa20c"
+ },
+ "aurelius-intro": {
+  "file": "aurelius-intro-202c2913.mp4",
+  "poster": "aurelius-intro-eba959ea.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 4.84,
+  "bytes": 1413107,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "26832c6893a4cc5adcee4b927eb2d265"
+ },
+ "hero-showreel": {
+  "file": "hero-showreel-d86f1dc7.mp4",
+  "poster": "hero-showreel-20286416.webp",
+  "w": 720,
+  "h": 1280,
+  "dur": 9.58,
+  "bytes": 2196188,
+  "audio": false,
+  "hdrSrc": "",
+  "sig": "f77ad70c4280786ce83d7aa806b4f20d"
+ }
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="{{SITE_LANG}}">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script>document.documentElement.classList.add("js");setTimeout(function(){if(!window.__app)document.documentElement.classList.add("no-app");},4000);</script><!-- sin JS, o si app.js no carga, todo el contenido igual se ve -->
+  <title>Trabajos — {{SITE_NAME}}</title>
+  <meta name="description" content="{{WORKS_DESC}}" />
+  <meta name="theme-color" content="#15100F" />
+  <meta name="color-scheme" content="dark light" />
+  <!--BUILD:seo-->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23ECE4D6'/%3E%3Cpath d='M15.5 11v10a4.2 4.2 0 0 1-7.6 2.4' fill='none' stroke='%2315100F' stroke-width='3.6' stroke-linecap='round'/%3E%3Ccircle cx='15.5' cy='5.8' r='2.3' fill='%2315100F'/%3E%3Ccircle cx='23.5' cy='22.6' r='2.9' fill='%23611313'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" />
+  <link rel="stylesheet" href="assets/css/site.css?v={{V_CSS}}" />
+</head>
+<body class="page-works">
+  <a class="skip" href="#contenido">Saltar al contenido</a>
+  <!--BUILD:nav-->
+
+  <!-- página de trabajos: videoclips, video para marcas, reels y fotografía (con filtro), y el contacto -->
+  <main id="contenido">
+    <!--BUILD:workshead-->
+    <!--BUILD:filters-->
+    <div class="works" id="trabajo">
+      <!--BUILD:projects-->
+    </div>
+    <!--BUILD:contact-->
+  </main>
+
+  <!--BUILD:footer-->
+
+  <!--BUILD:menu-->
+
+  <!-- visor de fotos con zoom: sin JS, cada foto es un link a la versión grande -->
+  <dialog class="lb" id="lb" aria-label="Visor de fotos">
+    <button class="lb__btn lb__close" type="button" aria-label="Cerrar">✕</button>
+    <button class="lb__btn lb__prev" type="button" aria-label="Foto anterior">←</button>
+    <button class="lb__btn lb__next" type="button" aria-label="Foto siguiente">→</button>
+    <div class="lb__tools" role="group" aria-label="Zoom">
+      <button class="lb__btn lb__zoomout" type="button" aria-label="Alejar">−</button>
+      <output class="lb__pct mono" aria-label="Nivel de zoom">1×</output>
+      <button class="lb__btn lb__zoomin" type="button" aria-label="Acercar">+</button>
+      <button class="lb__btn lb__fit" type="button" aria-label="Ajustar a la pantalla" title="Ajustar (0)">⤢</button>
+    </div>
+    <figure class="lb__fig">
+      <img class="lb__img" alt="" />
+      <figcaption class="lb__cap mono"></figcaption>
+    </figure>
+  </dialog>
+
+  <!-- reproductor de los reels completos (con sonido): sin JS, el botón abre el archivo en el navegador -->
+  <dialog class="player" id="player" aria-label="Reproductor de video">
+    <button class="lb__btn player__close" type="button" aria-label="Cerrar el video">✕</button>
+    <video class="player__video" controls playsinline preload="none"></video>
+    <p class="player__cap mono"></p>
+  </dialog>
+
+  <!-- videoclips: se ven acá con el reproductor de YouTube sin cookies; el iframe se crea recién al abrir. Sin JS, el link va a YouTube -->
+  <dialog class="yt" id="yt" aria-label="Videoclip">
+    <button class="lb__btn yt__close" type="button" aria-label="Cerrar el videoclip">✕</button>
+    <div class="yt__frame"></div>
+    <p class="yt__cap mono"><span class="yt__t"></span> <a class="yt__out" href="#" target="_blank" rel="noopener">Ver en YouTube ↗</a></p>
+  </dialog>
+
+  <script src="assets/js/app.js?v={{V_JS}}" defer></script>
+</body>
+</html>

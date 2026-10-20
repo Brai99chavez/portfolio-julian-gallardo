@@ -1,0 +1,28 @@
+# dependencias (solo desarrollo: sharp para optimizar imágenes)
+node_modules/
+
+# salida del build (se regenera con: npm run build)
+dist/
+
+# material del cliente: pesado, sin autorizar y NO va al sitio
+1 CARPETA PARA BRAI/
+contenido/
+_originales/
+
+# análisis interno: tiene datos de contacto, supuestos y notas
+_analisis/
+
+# copias del diseño para ir y volver entre rediseños (npm run diseno)
+_versiones/
+
+# paquete para arrastrar a Netlify (npm run zip)
+*.zip
+
+# varios
+.DS_Store
+Thumbs.db
+*.log
+scripts/og/.og.tmp.html
+
+# fotogramas bajados de YouTube (npm run youtube): fuente del optimizador, no se publica
+_fuentes/

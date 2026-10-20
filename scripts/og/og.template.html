@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8">
+<!-- Plantilla de la imagen para compartir (1200×630). Los marcadores entre llaves dobles los completa scripts/og/make-og.js
+     desde content.js y el manifest de imágenes: nombre, rótulo, bajada y foto nunca quedan desactualizados. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,700..800&family=Space+Mono&display=swap">
+<style>
+html,body{margin:0;width:1200px;height:630px;overflow:hidden;background:#15100F}
+.card{position:relative;width:1200px;height:630px;color:#EFE7D9;font-family:Archivo,sans-serif;
+  background:radial-gradient(closest-side at 78% 30%,rgba(150,30,26,.55),rgba(97,19,19,.25) 55%,transparent 80%),#15100F}
+.print{position:absolute;right:70px;top:78px;width:520px;height:370px;padding:9px;background:#F4EEE4;box-shadow:0 30px 60px -20px rgba(0,0,0,.9);transform:rotate(1.5deg)}
+.print img{width:100%;height:100%;object-fit:cover;object-position:{{HERO_POS}};display:block}
+.txt{position:absolute;left:72px;top:92px;width:560px}
+.eb{font:400 19px/1 "Space Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:#BDB2A2}
+h1{font-weight:800;font-stretch:112%;font-size:92px;line-height:.92;letter-spacing:-.018em;margin:26px 0 22px}
+p{font-weight:700;font-stretch:108%;font-size:34px;line-height:1.12;margin:0;color:#EFE7D9}
+.dot{color:#D4584C}
+.strip{position:absolute;left:0;right:0;bottom:0;height:58px;background:#611313;display:flex;align-items:center;gap:30px;padding:0 72px;
+  font:800 24px/1 Archivo,sans-serif;font-stretch:110%;color:#ECE4D6}
+.strip:before,.strip:after{content:"";position:absolute;left:0;right:0;height:6px;background:repeating-linear-gradient(to right,transparent 0 10px,rgba(21,16,15,.55) 10px 20px)}
+.strip:before{top:4px}.strip:after{bottom:4px}
+.strip b{font:400 17px/1 "Space Mono",monospace;letter-spacing:.12em;text-transform:uppercase}
+</style></head><body><div class="card">
+<div class="print"><img src="{{HERO_URL}}"></div>
+<div class="txt"><div class="eb">{{EYEBROW}}</div><h1>{{NAME}}<span class="dot">.</span></h1><p>{{TAGLINE}}<span class="dot">.</span></p></div>
+<div class="strip"><b>{{BRAND}}.</b>{{STRIP}}</div>
+</div></body></html>

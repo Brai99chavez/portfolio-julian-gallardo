@@ -1,0 +1,23 @@
+{
+  "name": "julian-gallardo-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portfolio de Julián Gallardo (jottav.) — fotografía y filmmaking. HTML + CSS + JS puro, con build que pre-renderiza y arma dist/.",
+  "scripts": {
+    "start": "node scripts/build.js --revision && node serve.js",
+    "build": "node scripts/build.js",
+    "build:revision": "node scripts/build.js --revision",
+    "optimize": "node scripts/optimize-img.js",
+    "optimize:video": "node scripts/optimize-video.js",
+    "og": "node scripts/og/make-og.js",
+    "diseno": "node scripts/disenos.js",
+    "zip": "node scripts/zip-dist.js",
+    "youtube": "node scripts/youtube-frames.js",
+    "check": "node scripts/check-dist.js",
+    "showreel": "node scripts/showreel.js"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "sharp": "^0.34.0"
+  }
+}

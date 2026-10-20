@@ -1,0 +1,11 @@
+# Deploy en Netlify: se publica SOLO dist/ (nunca la carpeta de originales ni _analisis/).
+# Los headers de cache viven en dist/_headers (los genera scripts/build.js).
+#
+# Hoy arma el MODO REVISIÓN (no indexable): es para mostrárselo a Julián, no para publicar.
+# Para publicar de verdad (con los pendientes en 0 y 0): cambiar el comando a
+# "npm run build" y definir en Netlify la variable de entorno SITE_URL
+# (ej: https://jottav.com.ar) para que el build emita canonical, og:url, og:image y JSON-LD.
+
+[build]
+  command = "npm run build:revision"
+  publish = "dist"
