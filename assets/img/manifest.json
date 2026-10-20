@@ -2337,7 +2337,7 @@
    {
     "w": 1280,
     "h": 630,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-lj4otlaqe9u-1280w-3a9e953b.webp",
     "bytes": 179968,
     "db": 41.8
@@ -2360,7 +2360,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-ssee67iqlw-1280w-d626d536.webp",
     "bytes": 70346,
     "db": 43.5
@@ -2383,7 +2383,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-ikgaay4agvw-1280w-eb2891e8.webp",
     "bytes": 120860,
     "db": 43.4
@@ -2406,7 +2406,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-5rpoqgjteuq-1280w-a619c05c.webp",
     "bytes": 47558,
     "db": 44.9
@@ -2429,7 +2429,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-os9udpwnxc4-1280w-c6583469.webp",
     "bytes": 35418,
     "db": 46.4
@@ -2452,7 +2452,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-nk878lr20de-1280w-88964afd.webp",
     "bytes": 39550,
     "db": 45.7
@@ -2475,7 +2475,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-zx8lmecsvs-1280w-ef53b8c3.webp",
     "bytes": 12818,
     "db": 51.1
@@ -2498,7 +2498,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-axlvg4hjavq-1280w-ddbe44b2.webp",
     "bytes": 48394,
     "db": 44.7
@@ -2521,7 +2521,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-ehbsnbsojls-1280w-bb9b512a.webp",
     "bytes": 41124,
     "db": 45.3
@@ -2544,7 +2544,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-lppc9wr2fqu-1280w-fd22bd7c.webp",
     "bytes": 201524,
     "db": 41.6
@@ -2567,7 +2567,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-v6rlkly5syw-1280w-8726c2b7.webp",
     "bytes": 62710,
     "db": 45
@@ -2590,7 +2590,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-5ndxylmoke-1280w-448dfb6e.webp",
     "bytes": 96566,
     "db": 43.9
@@ -2613,7 +2613,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-j4mtyhpy5r4-1280w-4ce17e80.webp",
     "bytes": 58628,
     "db": 44.2
@@ -2636,7 +2636,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-qgsn71jo9aw-1280w-5867baf3.webp",
     "bytes": 50520,
     "db": 45.3
@@ -2659,7 +2659,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-ysj8sttg8uw-1280w-972f02d3.webp",
     "bytes": 32318,
     "db": 46.5
@@ -2682,7 +2682,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-rjbcv3cowqc-1280w-850a4462.webp",
     "bytes": 65604,
     "db": 44.1
@@ -2705,7 +2705,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-izrxhkzp9qc-1280w-c65432c6.webp",
     "bytes": 39834,
     "db": 45.9
@@ -2728,7 +2728,7 @@
    {
     "w": 1280,
     "h": 600,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-q13l64redsi-1280w-f4cd4717.webp",
     "bytes": 24608,
     "db": 46.9
@@ -2751,7 +2751,7 @@
    {
     "w": 1280,
     "h": 720,
-    "role": "zoom",
+    "role": "card",
     "file": "clip-1zvifqhilu-1280w-f6823bdb.webp",
     "bytes": 53820,
     "db": 44.5
@@ -12343,25 +12343,48 @@
   ]
  },
  "julian-calle": {
-  "w": 1064,
-  "h": 1600,
+  "w": 1023,
+  "h": 1538,
   "q": 90,
   "variants": [
    {
     "w": 540,
     "h": 812,
     "role": "card",
-    "file": "julian-calle-540w-e97fe9fc.webp",
-    "bytes": 50252,
-    "db": 45.1
+    "file": "julian-calle-540w-b46939c2.webp",
+    "bytes": 44338,
+    "db": 44.9
    },
    {
-    "w": 1064,
-    "h": 1600,
-    "role": "zoom",
-    "file": "julian-calle-1064w-07ded152.webp",
-    "bytes": 122216,
-    "db": 46.3
+    "w": 1023,
+    "h": 1538,
+    "role": "card",
+    "file": "julian-calle-1023w-3db2fc24.webp",
+    "bytes": 109706,
+    "db": 45.9
+   }
+  ]
+ },
+ "julian-escenario": {
+  "w": 1023,
+  "h": 1537,
+  "q": 90,
+  "variants": [
+   {
+    "w": 540,
+    "h": 811,
+    "role": "card",
+    "file": "julian-escenario-540w-0c14b315.webp",
+    "bytes": 17788,
+    "db": 46.2
+   },
+   {
+    "w": 1023,
+    "h": 1537,
+    "role": "card",
+    "file": "julian-escenario-1023w-08baaa49.webp",
+    "bytes": 52264,
+    "db": 47.3
    }
   ]
  }

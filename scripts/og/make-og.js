@@ -35,7 +35,8 @@ const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 const tokens = {
   HERO_URL: pathToFileURL(heroFile).href,
   HERO_POS: (C.HERO.focus && C.HERO.focus.d) || "50% 45%",
-  EYEBROW: esc(C.HERO.eyebrow),
+  // en partes, como en la portada: si no entra en un renglón, baja la parte entera y sin el punto colgando
+  EYEBROW: C.HERO.eyebrow.split(" · ").map((t) => `<span>${esc(t)}</span>`).join(""),
   NAME: esc(C.SITE.name),
   TAGLINE: esc(C.HERO.title.join(" ")),
   BRAND: esc(C.SITE.brand),
@@ -60,6 +61,18 @@ fs.writeFileSync(tmp, html);
     }));
     if (!check.img) throw new Error("la foto de portada no cargó en la imagen (¿ruta o archivo roto?)");
     if (!check.fonts.some((f) => /Archivo/.test(f))) throw new Error("no cargó la tipografía Archivo (¿sin conexión a Google Fonts?)");
+    // ningún renglón de texto puede pisar la foto (el 20/10, con «CABA y La Plata», el rótulo se metía en su esquina).
+    // Se miden los renglones (Range), no las cajas: la caja de un título ocupa todo el ancho aunque el texto sea corto
+    const clash = await page.evaluate(() => {
+      const pr = document.querySelector(".print").getBoundingClientRect(), out = new Set();
+      for (const el of document.querySelectorAll(".txt .eb, .txt h1, .txt p")) {
+        const rg = document.createRange(); rg.selectNodeContents(el);
+        for (const r of rg.getClientRects())
+          if (r.width > 1 && r.right > pr.left && r.left < pr.right && r.bottom > pr.top && r.top < pr.bottom) out.add(`«${el.textContent.trim().slice(0, 40)}»`);
+      }
+      return [...out];
+    });
+    if (clash.length) throw new Error(`el texto pisa la foto: ${clash.join(", ")}`);
     const out = path.join(ROOT, "assets", "og.jpg");
     await page.screenshot({ path: out, type: "jpeg", quality: 86 });
     console.log(`\n✓ assets/og.jpg  (${(fs.statSync(out).size / 1024).toFixed(0)} KB)  · foto: ${card.file} · fuentes: ${[...new Set(check.fonts)].join(", ")}\n`);

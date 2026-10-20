@@ -220,7 +220,7 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
         const h = a.getAttribute("href");
         if (a.target === "_blank" && !/noopener/.test(a.rel)) bad.push("sin noopener: " + h);
         if (h.startsWith("#")) { if (h.length > 1 && !document.getElementById(h.slice(1))) bad.push("ancla rota: " + h); continue; }
-        if (/^https?:/.test(h)) { ext.add(h); if (!/^https:\/\/(www\.)?(instagram\.com\/(jottavisuals|jotta\.gallardo|reels?\/[\w-]+)\/|youtube\.com\/watch\?v=[\w-]{11}$|behance\.net\/julingallardo$|wa\.me\/5492213144443$)/.test(h)) bad.push("externo raro: " + h); continue; }
+        if (/^https?:/.test(h)) { ext.add(h); if (!/^https:\/\/(www\.)?(instagram\.com\/(jottavisuals|jotta\.gallardo|reels?\/[\w-]+)\/|youtube\.com\/watch\?v=[\w-]{11}$|linkedin\.com\/in\/julian-gallardo-910a31215\/$|wa\.me\/5492213144443$)/.test(h)) bad.push("externo raro: " + h); continue; }
         if (h.startsWith("mailto:")) { if (h !== "mailto:juliangallardo249@gmail.com") bad.push("mail raro: " + h); continue; }
         const [file, anchor] = h.split("#");
         const res = await fetch(file, { method: "HEAD" }); if (!res.ok) bad.push(`${res.status} ${file}`);
@@ -459,6 +459,22 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
       const p = await newPage(b, w, h);
       await p.goto(BASE + "/", { waitUntil: "networkidle0" }); await wait(2300);
       if (PLANT === "overlap") await p.evaluate(() => { document.querySelector(".reel--hero").style.bottom = "-160px"; });
+      // planta del rótulo: las partes vuelven a ser texto corrido (como antes del 20/10, cuando quedaba «Plata» sola abajo)
+      if (PLANT === "rotulo") await p.evaluate(() => { const st = document.createElement("style"); st.textContent = ".eyebrow__in{display:block!important;margin:0!important}.eyebrow__p::before{content:' · '!important;width:auto!important}"; document.head.appendChild(st); });
+      // el rótulo («Fotógrafo y filmmaker · CABA y La Plata») corta solo entre partes, y el punto de la parte que arranca
+      // un renglón queda fuera del recuadro (recortado). Se mide letra por letra: cada parte, todas sus letras en un renglón
+      const eb = await p.evaluate(() => {
+        const box = document.querySelector(".hero .eyebrow"), parts = [...box.querySelectorAll(".eyebrow__p")];
+        const tops = (sp) => { const s = [], tn = sp.firstChild; for (let i = 0; i < tn.length; i++) { const rg = document.createRange(); rg.setStart(tn, i); rg.setEnd(tn, i + 1); const rc = rg.getClientRects()[0]; if (rc && rc.width) s.push(Math.round(rc.top)); } return s; };
+        const bl = box.getBoundingClientRect().left, clip = getComputedStyle(box).overflowX === "hidden";
+        const split = parts.filter((sp) => new Set(tops(sp)).size > 1).map((sp) => sp.textContent);
+        // una parte arranca renglón si es la primera o si su primera letra está más abajo que la última de la anterior:
+        // ahí su punto (::before, dentro de su caja) tiene que quedar a la izquierda del recuadro, que lo recorta
+        const starts = parts.filter((sp, k) => k === 0 || tops(sp)[0] > tops(parts[k - 1]).slice(-1)[0]);
+        const dotVisible = starts.filter((sp) => !(clip && sp.getBoundingClientRect().left < bl - 1)).map((sp) => sp.textContent);
+        return { parts: parts.length, split, dotVisible, rows: new Set(parts.flatMap(tops)).size };
+      });
+      ok(`portada ${w}×${h}: el rótulo corta entre partes, sin punto colgando`, eb.parts >= 2 && !eb.split.length && !eb.dotVisible.length, JSON.stringify(eb));
       const r = await p.evaluate(() => {
         const reel = document.querySelector(".reel--hero").getBoundingClientRect();
         const nav = document.querySelector(".nav").getBoundingClientRect();
@@ -473,6 +489,38 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
       ok(`portada ${w}×${h}: el reel no toca ningún renglón ni la barra`, r.hit === 0 && !r.underNav && r.rw <= r.vw, JSON.stringify(r));
       if (w < 800 && h >= 640 && h > w) ok(`portada ${w}×${h}: título y botones se ven sin bajar`, r.titleVisible && r.ctaVisible, `título ${r.titleVisible} · botones ${r.ctaVisible}`);
       if (h < w && h <= 500) ok(`portada acostado ${w}×${h}: el título entra en una pantalla`, r.titleVisible, `${r.titleVisible}`);
+      await p.close();
+    }
+  }
+
+  /* 9) nitidez: la foto de portada y la de «Sobre mí» no se ven estiradas en pantallas de alta densidad, salvo que la
+     original no dé para más. Hasta el 20/10, una foto de ~1000 px (las que llegan por WhatsApp) tenía su medida grande solo
+     para el zoom: el retina recibía la de 540 px estirada al doble. Se compara contra el ancho de la ORIGINAL (manifest) */
+  if (!only || only === "nitidez") {
+    const MAN = require("path").join(__dirname, "..", "..", "assets", "img", "manifest.json");
+    const man = JSON.parse(require("fs").readFileSync(MAN, "utf8"));
+    for (const [w, h, dpr] of [[390, 844, 3], [1440, 900, 2], [1920, 1080, 2]]) {
+      const p = await newPage(b, w, h, { dpr });
+      await p.goto(BASE + "/", { waitUntil: "networkidle0" });
+      for (const sel of [".print--hero img", ".about__photo img"]) {
+        // planta: la foto vuelve a ofrecer solo su medida chica (como antes del arreglo)
+        if (PLANT === "nitidez") await p.evaluate((s) => { const i = document.querySelector(s); i.srcset = i.srcset.split(",")[0]; }, sel);
+        await p.evaluate((s) => document.querySelector(s).scrollIntoView({ behavior: "instant", block: "center" }), sel);
+        await p.waitForFunction((s) => { const i = document.querySelector(s); return i.complete && i.naturalWidth > 0 && i.currentSrc; }, { timeout: 15000 }, sel);
+        await wait(400);
+        const r = await p.evaluate((s) => {
+          const i = document.querySelector(s), b = i.getBoundingClientRect(), ar = i.naturalWidth / i.naturalHeight;
+          // ojo: con srcset, naturalWidth viene dividido por la densidad elegida (da píxeles CSS, no los del archivo):
+          // el ancho real del archivo servido sale de su nombre (<id>-<ancho>w-<hash>.webp)
+          const file = i.currentSrc.split("/").pop(), m = file.match(/-(\d+)w-[0-9a-f]{8}\.webp$/);
+          // object-fit: cover → la foto se dibuja al ancho mayor entre el de la caja y el que pide su alto
+          return { nat: m ? +m[1] : 0, need: Math.round(Math.max(b.width, b.height * ar) * devicePixelRatio), file };
+        }, sel);
+        const id = r.file.replace(/-\d+w-[0-9a-f]{8}\.webp$/, ""), src = man[id] ? man[id].w : 0;
+        const cap = Math.min(r.need, src || r.need);
+        ok(`nitidez ${w}px @${dpr}x ${sel.split(" ")[0]}: la foto no se estira de más`, r.nat >= cap * 0.9,
+          `${r.nat} px servidos para ${r.need} px de pantalla · original ${src} px (${r.file})${r.need > src * 1.1 ? " · la original no alcanza para esta pantalla" : ""}`);
+      }
       await p.close();
     }
   }

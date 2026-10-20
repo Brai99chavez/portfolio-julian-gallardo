@@ -56,21 +56,21 @@ const SITE = {
   role: "Fotógrafo y filmmaker",
   lang: "es-AR",
   year: 2026,
-  location: "La Plata, Buenos Aires",
-  description: "Julián Gallardo (jottav.), fotógrafo y filmmaker de La Plata: videoclips, contenido para artistas y marcas, y fotos de shows, moda y casamientos.",
+  // Julián (20/10): «agregale CABA … que se entienda que trabajo en capital también y más que nada principalmente». Vive en La Plata.
+  location: "CABA y La Plata",
+  description: "Julián Gallardo (jottav.), fotógrafo y filmmaker en CABA y La Plata: videoclips, contenido para artistas y marcas, y fotos de shows, moda y casamientos.",
 };
 
 /* ---------- portada ---------- */
 const HERO = {
-  eyebrow: "Fotógrafo y filmmaker · La Plata",
+  eyebrow: "Fotógrafo y filmmaker · CABA y La Plata",
   // se escribe en minúscula y termina con el punto bordó, como su logo «jottav.»
   title: ["videoclips, fotos", "y contenido para", "artistas y marcas"],
   lead: "Dirijo, filmo, monto y coloreo videoclips, y fotografío shows, moda, producto y casamientos, buscando que cada imagen tenga identidad.",
-  // v2 «En vivo»: dos pantallas verticales, una foto y el showreel. La foto va a ser la de Julián filmando con el gimbal en un
-  // escenario (Braian la pasó el 19/10, pegada en el chat: falta el archivo).
-  // CAMBIAR DESPUÉS: con el archivo en «1 CARPETA PARA BRAI», declararla en IMAGES («julian-escenario») y ponerla acá
-  image: "vivo-humo",                    // mientras tanto, un show (vertical)
-  focus: { m: "50% 35%", d: "50% 35%" }, // encuadre: m = celular, d = escritorio
+  // v2 «En vivo»: dos pantallas verticales, una foto y el showreel. La foto es la de Julián filmando con el gimbal en un
+  // escenario (la pidió él en su doc; el archivo llegó el 20/10)
+  image: "julian-escenario",
+  focus: { m: "50% 70%", d: "50% 70%" }, // encuadre: m = celular, d = escritorio
   video: "hero-showreel",                // montaje vertical de sus trabajos de video (ver SHOWREEL)
   caption: "Showreel: Aurelius, Aryes y Zambia, 2025–2026",
 };
@@ -94,8 +94,9 @@ const STRIP = ["Lea!", "GZ", "OMAI", "Brunno SR", "Ele De", "Klan", "Esperando e
            boda-alianzas (grano de la iglesia) y vivo-co2 (humo) dan PSNR bajo por la textura, y a ojo son iguales al original (19/10)
    crop = (opcional) recorte en px del original, antes de achicar: saca el subtítulo de la letra quemado en un fotograma */
 const IMAGES = {
-  /* — Julián (Braian, 20/10: «perfil de Julián para su sobre mí») — */
-  "julian-calle":   { g: "julian", f: "perfil.jpeg", alt: "Julián Gallardo en blanco y negro, en una calle con gente, sonríe mientras saca una foto con la cámara contra la cara." },
+  /* — Julián: las dos que pidió en su doc (20/10). La de la calle es perfil.jpeg sin la gente de atrás (la sacó él) — */
+  "julian-escenario": { g: "julian", f: "principal.jpeg", alt: "Julián Gallardo en blanco y negro, de perfil en un escenario a oscuras, camina filmando con una cámara en un gimbal, entre los telones y dos monitores de piso." },
+  "julian-calle":   { g: "julian", f: "secundaria.jpeg", alt: "Julián Gallardo en blanco y negro, en una calle con niebla, sonríe mientras saca una foto con la cámara contra la cara." },
 
   /* — En vivo (2026) — */
   "vivo-abanico":   { g: "vivo", f: "DSC08900.jpg", alt: "Un rapero con buzo gris canta en la pasarela de un escenario grande, entre un abanico de haces de luz blanca y una pantalla roja; adelante, otro fotógrafo levanta la cámara." },
@@ -263,6 +264,10 @@ const REELS = [
   { kind: "Entrevistas", account: "@valeenpretto", title: "Fans de Oney en su show (4 reels)", href: "https://www.instagram.com/reel/DaBeODJuIGS/", note: null,
     more: ["https://www.instagram.com/reel/DZ-RGLQJj0J/", "https://www.instagram.com/reel/DZ6Kz7FPfEp/", "https://www.instagram.com/reel/DZ5OvvBA8t7/"] },
   { kind: "Deportivo", account: "@gimnasio.mda", title: "Clase de Power Jump", href: "https://www.instagram.com/reels/DUVU7fpDbdS/", note: null },
+  // los dos que sumó Julián el 20/10. Roles según cada posteo: el de Barber 43 lo acredita con «🎥 @jotta.gallardo @jottavisuals»
+  // (16/02/2026); el de Ribetheo dice «Grabado y editado por @leagallardo4 y @jotagallardo.stj» (13/07/2024)
+  { kind: "Barbería", account: "@barber.43", title: "Barber 43, club de barbería en Bariloche", href: "https://www.instagram.com/reel/DU1hFJ2k2uv/", note: "Cámara" },
+  { kind: "Barbería", account: "@ribetheo_", title: "Ribetheo, barbero", href: "https://www.instagram.com/reel/C9XjRblsVwx/", note: "Cámara y montaje" },
 ];
 
 /* ---------- categorías del filtro de trabajos ---------- */
@@ -378,7 +383,7 @@ for (const p of PROJECTS) for (const id of p.more || []) if (!mainImages.has(id)
 /* ---------- sobre mí ---------- */
 /* Texto de Julián (su «about me»), con los clichés que él mismo pidió sacar. Los datos son los suyos. */
 const ABOUT = {
-  photo: "julian-calle",  // la eligió Braian (20/10)
+  photo: "julian-calle",  // la pidió Julián (20/10)
   photoPos: "54% 32%",    // la cara y la cámara, en el recorte 3:4
   title: "sobre mí",
   paragraphs: [
@@ -408,7 +413,8 @@ const TIMELINE = [
 
 /* ---------- qué hago ---------- */
 const SERVICES = {
-  title: "qué hago",
+  // Julián (20/10): que no diga «qué hago» dos veces (el rótulo de arriba ya lo dice); la palabra la eligió Braian
+  title: "producción",
   lead: "Puedo hacer todo el proceso o sumarme en una parte: la cámara, la luz, el montaje o el color.",
   items: [
     { n: "01", title: "Videoclips", img: "clip-ssee67iqlw", list: ["Idea y dirección", "Cámara y luz", "Montaje", "Corrección de color"] },
@@ -443,8 +449,8 @@ const CONTACT = {
     { key: "instagram", label: "Instagram", detail: "@jottavisuals", href: "https://www.instagram.com/jottavisuals/" },
     { key: "email", label: "Mail", detail: "juliangallardo249@gmail.com", href: "mailto:juliangallardo249@gmail.com", copy: "juliangallardo249@gmail.com" },
     { key: "instagram2", label: "Instagram personal", detail: "@jotta.gallardo", href: "https://www.instagram.com/jotta.gallardo/" },
-    // Braian (19/10): «hacelo» (enlazar su Behance)
-    { key: "behance", label: "Behance", detail: "julingallardo", href: "https://www.behance.net/julingallardo" },
+    // Julián (20/10): «sacale el contacto de Behance y cambialo por este de LinkedIn» (sin el ?isSelfProfile del link que pasó)
+    { key: "linkedin", label: "LinkedIn", detail: "Julián Gallardo", href: "https://www.linkedin.com/in/julian-gallardo-910a31215/" },
   ],
 };
 

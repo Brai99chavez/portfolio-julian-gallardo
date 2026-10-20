@@ -68,6 +68,12 @@ ul, ol { padding: 0; list-style: none; }
   font-family: var(--f); font-weight: 600; letter-spacing: -0.02em; line-height: .98; }
 .h2 { font-size: clamp(2.5rem, 8.4vw, 5.4rem); margin: .2em 0 .3em; }
 .kicker, .eyebrow { display: inline-block; font-size: 12.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--kick); }
+/* rótulo en partes («Fotógrafo y filmmaker» · «CABA y La Plata»): cada parte lleva su punto adelante y la fila arranca
+   un punto más a la izquierda, fuera del recuadro, que lo recorta. Así el punto del primer renglón y el de una parte que
+   bajó de renglón no se ven, y nunca queda una palabra sola abajo («Plata») ni un punto colgando */
+.eyebrow--parts { --sep: 1.3em; overflow: hidden; vertical-align: top; }   /* 1.3em = el ancho de « · » con este tracking */
+.eyebrow__in { display: flex; flex-wrap: wrap; margin-left: calc(-1 * var(--sep)); }
+.eyebrow__p::before { content: "·"; content: "·" / ""; display: inline-block; width: var(--sep); text-align: center; }
 .head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 1.2rem 2rem; margin-bottom: clamp(1.8rem, 4vw, 3rem); }
 .head__lead { max-width: 40em; color: var(--fg2); font-size: clamp(1rem, 1.25vw, 1.1rem); }
 .head__tools { display: flex; align-items: center; gap: .6rem; }
@@ -165,8 +171,10 @@ html.menu-open, html.is-locked { overflow: hidden; }
 }
 .hero__grid { position: relative; z-index: 1; display: grid; gap: clamp(1.4rem, 4vw, 3rem); align-items: center; }
 /* las dos pantallas verticales: la foto y el showreel */
-/* celular: el alto de las pantallas sale de la cuenta para que título y botones entren sin bajar en 360×640 y 375×667 */
-.hero__screens { --h: min(30svh, 253px); position: relative; display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; order: -1; }
+/* celular: el alto de las pantallas sale de la cuenta para que título y botones entren sin bajar en 360×640 y 375×667.
+   100svh - 468px = lo que queda después de la barra, el rótulo (dos renglones desde que dice «CABA y La Plata»), el título,
+   la bajada y los botones en 360 px; manda solo en pantallas de menos de ~670 px de alto, y nunca baja del 27svh */
+.hero__screens { --h: min(30svh, 253px, max(100svh - 468px, 27svh)); position: relative; display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; order: -1; }
 .screen { position: relative; margin: 0; overflow: hidden; border-radius: var(--radius); background: var(--k2); box-shadow: 0 30px 70px -28px rgba(0, 0, 0, .9); }
 .print--hero { height: var(--h); aspect-ratio: 3 / 4; }
 .print--hero img { width: 100%; height: 100%; object-fit: cover; object-position: var(--focus-m); }
@@ -209,7 +217,7 @@ html.menu-open, html.is-locked { overflow: hidden; }
 @keyframes up { from { transform: translateY(105%); } to { transform: none; } }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 @keyframes switchon { 0% { opacity: 0; filter: brightness(2.6); } 12% { opacity: 1; } 30% { filter: brightness(1.5); } 100% { opacity: 1; filter: none; } }
-@keyframes stamp { from { opacity: 0; transform: scale(1.7) rotate(-16deg); } 70% { opacity: 1; } to { opacity: 1; transform: none; } }
+@keyframes stamp { from { opacity: 0; transform: scale(1.7) rotate(-16deg); } 70% { opacity: 1; } to { opacity: 1; transform: rotate(var(--tilt, 0deg)); } }
 @media (prefers-reduced-motion: no-preference) {
   .js:not(.no-app) .hero__in { animation: up .9s var(--ease) backwards; animation-delay: calc(.15s + var(--i) * .1s); }
   .js:not(.no-app) .hero__lead, .js:not(.no-app) .hero__cta, .js:not(.no-app) .hero .eyebrow { animation: rise .8s var(--ease) .55s backwards; }
@@ -376,11 +384,12 @@ html.menu-open, html.is-locked { overflow: hidden; }
 /* ---------- contacto ---------- */
 .contact { overflow: clip; }
 .contact__inner { position: relative; }
-.contact__stamp { position: absolute; right: var(--gutter); top: -1rem; width: clamp(110px, 16vw, 200px); height: auto; padding: 8px; background: var(--b); border-radius: 12px; transform: rotate(8deg);
+.contact__end { display: flex; align-items: center; justify-content: space-between; gap: 1rem; max-width: 660px; margin-top: 1.8rem; }
+.contact__stamp { --tilt: 8deg; flex: none; width: clamp(96px, 11vw, 150px); height: auto; padding: 8px; background: var(--b); border-radius: 12px; transform: rotate(var(--tilt));
   box-shadow: 0 20px 40px -18px rgba(0, 0, 0, .6); }
 @media (prefers-reduced-motion: no-preference) {
-  .js:not(.no-app) .contact__inner:has(.contact__title:not(.is-in)) .contact__stamp { opacity: 0; transform: scale(1.7) rotate(-10deg); }
-  .js:not(.no-app) .contact__inner:has(.contact__title.is-in) .contact__stamp { animation: stamp .6s cubic-bezier(.2, 1.4, .4, 1) .25s backwards; }
+  .js:not(.no-app) .contact__end:not(.is-in) .contact__stamp { opacity: 0; transform: scale(1.7) rotate(-10deg); }
+  .js:not(.no-app) .contact__end.is-in .contact__stamp { animation: stamp .6s cubic-bezier(.2, 1.4, .4, 1) .25s backwards; }
 }
 .contact__title { font-size: clamp(3.2rem, 15vw, 10.5rem); font-weight: 700; margin: .25em 0 .3em; line-height: .9; }
 .contact__lead { max-width: 30em; font-size: clamp(1.02rem, 1.5vw, 1.2rem); }
@@ -397,7 +406,7 @@ html.menu-open, html.is-locked { overflow: hidden; }
 .copy[hidden] { display: none; }
 .copy.is-done { background: var(--btn-bg); color: var(--btn-fg); }
 @media not all and (hover: hover) and (pointer: fine) { .copy, .copy:not([hidden]) { display: none; } .chan--split .btn { border-radius: 999px; } }
-.contact__meta { margin-top: 1.8rem; font-size: 12.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.contact__meta { font-size: 12.5px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
 
 /* ---------- footer ---------- */
 .footer { padding-block: 0 2rem; overflow: hidden; }

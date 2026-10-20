@@ -134,6 +134,8 @@ function heroHTML(C, M, V) {
   const srcset = vs.map((v) => `assets/img/${v.file} ${v.w}w`).join(", ");
   const focus = { m: "50% 40%", d: "50% 40%", ...(HERO.focus || {}) };
   const lines = HERO.title.map((t, i) => `<span class="hero__line" style="--i:${i}"><span class="hero__in">${esc(t)}${i === HERO.title.length - 1 ? '<span class="dot" aria-hidden="true">.</span>' : ""}</span></span>`).join(" ");
+  // el rótulo, en partes (las separa « · » en content.js): si no entra en un renglón, la parte baja entera y sin el punto (CSS)
+  const eyebrow = HERO.eyebrow.split(" · ").map((t) => `<span class="eyebrow__p">${esc(t)}</span>`).join(" ");
   let reel = "";
   if (HERO.video) {
     const v = videoOf(V, HERO.video);
@@ -152,7 +154,7 @@ function heroHTML(C, M, V) {
     <div class="beams" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="wrap hero__grid">
       <div class="hero__text">
-        <p class="eyebrow">${esc(HERO.eyebrow)}</p>
+        <p class="eyebrow eyebrow--parts"><span class="eyebrow__in">${eyebrow}</span></p>
         <h1 class="hero__title">${lines}</h1>
         <p class="hero__lead">${esc(HERO.lead)}</p>
         <div class="hero__cta">
@@ -229,7 +231,7 @@ function featuredHTML(C, M, V) {
         <div>
           <p class="kicker">Selección</p>
           <h2 class="h2">${titled("lo mejor")}</h2>
-          <p class="head__lead">Videos y fotos elegidos. Todo lo demás —${C.CLIPS.length} videoclips, video para marcas y ${nPhotos} fotos— está en <a class="link" href="trabajos.html">Trabajos</a>.</p>
+          <p class="head__lead">Una selección de videos y fotografías. El resto de mis trabajos —${C.CLIPS.length} videoclips, videos para marcas y ${nPhotos} fotografías— está disponible en <a class="link" href="trabajos.html">Trabajos</a>.</p>
         </div>
         <div class="head__tools">
           ${anyVideo ? `<button class="toggle" type="button" data-toggle="picks" hidden><i aria-hidden="true"></i><span class="toggle__t">Pausar videos</span></button>` : ""}
@@ -330,6 +332,7 @@ function toolsHTML(C) {
 }
 
 /* ---------- contacto ---------- */
+/* El sello firma al final, al lado de la ubicación: arriba del título lo tapaba en el celular (Julián, 20/10). */
 function contactHTML(C) {
   const { CONTACT, SITE } = C;
   const chans = CONTACT.channels.map((c) => {
@@ -343,7 +346,6 @@ function contactHTML(C) {
   return `
   <section class="section contact" id="contacto" data-tone="accent">
     <div class="wrap contact__inner">
-      <img class="contact__stamp" src="assets/brand/sello.webp" width="166" height="139" alt="" aria-hidden="true" loading="lazy">
       <p class="kicker">Contacto</p>
       <h2 class="contact__title" data-reveal>${titled(CONTACT.title)}</h2>
       <p class="contact__lead">${esc(CONTACT.lead)}</p>
@@ -351,7 +353,10 @@ function contactHTML(C) {
           ${chans}
       </div>
       <p class="sr-only" id="copyStatus" role="status" aria-live="polite"></p>
-      <p class="contact__meta">${SITE.location ? esc(SITE.location) : `Ubicación ${pend()}`}</p>
+      <div class="contact__end" data-reveal>
+        <p class="contact__meta">${SITE.location ? esc(SITE.location) : `Ubicación ${pend()}`}</p>
+        <img class="contact__stamp" src="assets/brand/sello.webp" width="166" height="139" alt="" aria-hidden="true" loading="lazy">
+      </div>
     </div>
   </section>`;
 }
@@ -506,7 +511,7 @@ function reelsListHTML(C, num) {
         <header class="label label--wide">
           <p class="label__k"><span class="label__n">${num}</span>Instagram</p>
           <h2 class="label__t">${titled("reels para redes")}</h2>
-          <p class="label__text">Contenido vertical que filmé para cuentas de artistas, bailarinas y un gimnasio.</p>
+          <p class="label__text">Contenido vertical que filmé para cuentas de artistas, bailarinas, un gimnasio y barberías.</p>
         </header>
         <ol class="igs">${rows}
         </ol>

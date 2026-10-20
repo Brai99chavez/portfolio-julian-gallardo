@@ -97,10 +97,11 @@ function seoHTML(page = "home") {
     if (og) lines.push(`<meta property="og:image" content="${SITE_URL}/assets/og.jpg" />`,
                        `<meta property="og:image:width" content="1200" />`, `<meta property="og:image:height" content="630" />`,
                        `<meta property="og:image:alt" content="${esc(C.IMAGES[HERO.image].alt)}" />`);
-    const sameAs = C.CONTACT.channels.filter((c) => /instagram|behance/.test(c.key) && c.href).map((c) => c.href);
+    const sameAs = C.CONTACT.channels.filter((c) => /instagram|linkedin|behance/.test(c.key) && c.href).map((c) => c.href);
+    // SITE.location es donde trabaja (CABA y La Plata), no donde vive: workLocation
     const ld = { "@context": "https://schema.org", "@type": "Person", name: SITE.name, alternateName: SITE.brand + ".",
                  jobTitle: SITE.role, url: SITE_URL + "/", ...(sameAs.length ? { sameAs } : {}),
-                 ...(SITE.location ? { homeLocation: { "@type": "Place", name: SITE.location } } : {}) };
+                 ...(SITE.location ? { workLocation: { "@type": "Place", name: SITE.location } } : {}) };
     if (page === "home") lines.push(`<script type="application/ld+json">${JSON.stringify(ld)}</script>`);
   } else {
     lines.push(`<!-- ${T.PEND.toUpperCase()}: canonical, og:url, og:image y JSON-LD necesitan el dominio. Compilá con SITE_URL=https://… -->`);

@@ -69,6 +69,9 @@ function pickVariants(dw, dh, lite = false) {
   }
   let cards = t.card.filter((w) => w <= dw);
   if (!cards.length) cards = [dw];
+  // entre dos medidas de tarjeta (las que llegan por WhatsApp, ~1000 px; los fotogramas de YouTube, 1280), el original entero
+  // es la tarjeta grande. Antes quedaba solo para el zoom, y en un retina la portada y «Sobre mí» se veían en 540 px estirados
+  if (t.card.some((w) => w > dw) && dw > cards[cards.length - 1] * 1.1) cards.push(dw);
   const out = cards.map((w) => ({ w, role: "card" }));
   const top = cards[cards.length - 1];
   if (t.big <= dw && t.big > top * 1.1) out.push({ w: t.big, role: "big" });
