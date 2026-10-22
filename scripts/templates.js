@@ -129,10 +129,20 @@ function menuHTML(C, page = "home") {
    si no hay movimiento reducido ni ahorro de datos, y se puede pausar. Sin JS queda su póster. */
 function heroHTML(C, M, V) {
   const { HERO } = C;
-  const vs = heroSet(variantsOf(M, HERO.image).vs);
-  const big = vs[vs.length - 1];
-  const srcset = vs.map((v) => `assets/img/${v.file} ${v.w}w`).join(", ");
-  const focus = { m: "50% 40%", d: "50% 40%", ...(HERO.focus || {}) };
+  const rotate = HERO.images.length > 1;
+  // la rotación se pausa con el botón del showreel (WCAG 2.2.2: lo que se mueve solo más de 5 s se tiene que poder frenar)
+  if (rotate && !HERO.video) throw new Error("HERO.images con más de una foto necesita HERO.video: la rotación usa el botón de pausa del showreel");
+  // la primera foto se ve al entrar (y sin JS); las demás nacen sin bajar (data-src) y app.js las trae un rato antes de mostrarlas
+  const shots = HERO.images.map((h, k) => {
+    const vs = heroSet(variantsOf(M, h.img).vs);
+    const big = vs[vs.length - 1];
+    const srcset = vs.map((v) => `assets/img/${v.file} ${v.w}w`).join(", ");
+    const focus = { m: "50% 40%", d: "50% 40%", ...(h.focus || {}) };
+    const src = k === 0 ? `src="assets/img/${big.file}" srcset="${srcset}"` : `src="${BLANK}" data-src="assets/img/${big.file}" data-srcset="${srcset}"`;
+    return `
+          <img${k === 0 ? ' class="is-on"' : ""} ${src} sizes="${HERO_SIZES}"
+               width="${big.w}" height="${big.h}" alt="${esc(C.IMAGES[h.img].alt)}"${k === 0 ? ' fetchpriority="high"' : ' aria-hidden="true"'} decoding="async" style="--focus-m:${esc(focus.m)};--focus-d:${esc(focus.d)}">`;
+  }).join("");
   const lines = HERO.title.map((t, i) => `<span class="hero__line" style="--i:${i}"><span class="hero__in">${esc(t)}${i === HERO.title.length - 1 ? '<span class="dot" aria-hidden="true">.</span>' : ""}</span></span>`).join(" ");
   // el rótulo, en partes (las separa « · » en content.js): si no entra en un renglón, la parte baja entera y sin el punto (CSS)
   const eyebrow = HERO.eyebrow.split(" · ").map((t) => `<span class="eyebrow__p">${esc(t)}</span>`).join(" ");
@@ -146,7 +156,7 @@ function heroHTML(C, M, V) {
             <video class="reel__video" muted loop playsinline preload="none" data-src="assets/video/${v.file}" aria-hidden="true" tabindex="-1"></video>
           </span>
           ${filmCap("<i></i>showreel")}
-          <button class="reel__pause" type="button" aria-label="Pausar el video" hidden><i aria-hidden="true"></i></button>
+          <button class="reel__pause" type="button" aria-label="Pausar el video${rotate ? " y las fotos" : ""}" hidden><i aria-hidden="true"></i></button>
         </figure>`;
   }
   return `
@@ -162,10 +172,8 @@ function heroHTML(C, M, V) {
           <a class="btn btn--ghost btn--lg" href="#contacto"><span class="btn__t">Escribime</span></a>
         </div>
       </div>
-      <div class="hero__screens" style="--focus-m:${esc(focus.m)};--focus-d:${esc(focus.d)}">
-        <figure class="screen print--hero">
-          <img src="assets/img/${big.file}" srcset="${srcset}" sizes="${HERO_SIZES}"
-               width="${big.w}" height="${big.h}" alt="${esc(C.IMAGES[HERO.image].alt)}" fetchpriority="high" decoding="async">
+      <div class="hero__screens">
+        <figure class="screen print--hero${rotate ? " print--rotate" : ""}"${rotate ? ` data-every="${+HERO.every || 4000}"` : ""}>${shots}
         </figure>${reel}
         <p class="hero__cap">${esc(HERO.caption)}</p>
       </div>

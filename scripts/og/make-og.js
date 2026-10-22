@@ -25,8 +25,11 @@ try { BROWSER = resolveBrowser(); } catch (e) { console.error("\n✗ " + e.messa
 if (!fs.existsSync(manifestPath)) { console.error("\n✗ Falta assets/img/manifest.json — corré primero: npm run optimize\n"); process.exit(1); }
 
 const M = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-const hero = M[C.HERO.image];
-if (!hero) { console.error(`\n✗ La foto de portada "${C.HERO.image}" no está en el manifest.\n`); process.exit(1); }
+// la foto: SITE.share (Julián) o, si no hay, la primera de la portada
+const first = C.HERO.images[0];
+const share = (C.SITE.share && C.SITE.share.img) ? C.SITE.share : { img: first.img, pos: first.focus && first.focus.d };
+const hero = M[share.img];
+if (!hero) { console.error(`\n✗ La foto para compartir "${share.img}" no está en el manifest.\n`); process.exit(1); }
 const card = hero.variants.filter((v) => v.role === "card").pop();
 const heroFile = path.join(ROOT, "assets", "img", card.file);
 if (!fs.existsSync(heroFile)) { console.error(`\n✗ No existe ${card.file}. Corré: npm run optimize\n`); process.exit(1); }
@@ -34,7 +37,7 @@ if (!fs.existsSync(heroFile)) { console.error(`\n✗ No existe ${card.file}. Cor
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const tokens = {
   HERO_URL: pathToFileURL(heroFile).href,
-  HERO_POS: (C.HERO.focus && C.HERO.focus.d) || "50% 45%",
+  HERO_POS: share.pos || "50% 45%",
   // en partes, como en la portada: si no entra en un renglón, baja la parte entera y sin el punto colgando
   EYEBROW: C.HERO.eyebrow.split(" · ").map((t) => `<span>${esc(t)}</span>`).join(""),
   NAME: esc(C.SITE.name),

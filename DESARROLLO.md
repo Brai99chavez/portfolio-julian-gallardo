@@ -43,7 +43,8 @@ Todo está en `content.js`. Un dato en `null` (o una herramienta con `confirmed:
 
 - **Una foto nueva:** dejarla en `1 CARPETA PARA BRAI/fotos/…`, declararla en `IMAGES` (grupo + nombre de archivo + `alt`), sumarla a `frames` de un trabajo y correr `npm run optimize` y `npm run build:revision`.
 - **Un videoclip nuevo:** sumarlo a `CLIPS` (id de YouTube, `frame` 1/2/3, artista, tema, fecha y roles) y correr `npm run youtube`, `npm run optimize` y el build.
-- **La foto de «Sobre mí»:** declararla en `IMAGES` y ponerla en `ABOUT.photo`.
+- **La foto de «Sobre mí»:** declararla en `IMAGES` y ponerla en `ABOUT.photo` (con `photoPos` para el encuadre).
+- **Las fotos de la portada:** van en `HERO.images`, en el orden en que rotan (la primera es la que se ve al entrar), cada una con su encuadre (`focus`). `HERO.every` = cada cuánto cambia. Con una sola foto no rota. La imagen para compartir usa `SITE.share`.
 
 ## Publicar en Netlify
 
@@ -58,12 +59,12 @@ Se prueba con puppeteer-core y **chrome-headless-shell** (nunca Edge), con el si
 ```
 npm i --no-save puppeteer-core
 node scripts/pruebas/verify.js http://localhost:5181            # la batería completa
-node scripts/pruebas/verify.js http://localhost:5181 --only=cinta   # una sección: anchos, todas, sinjs, teclado, contraste, links, interaccion, red, v2, cinta, portada, nitidez
+node scripts/pruebas/verify.js http://localhost:5181 --only=cinta   # una sección: anchos, todas, sinjs, teclado, contraste, links, interaccion, red, v2, cinta, portada, nitidez, rotacion
 node scripts/pruebas/verify.js http://localhost:5181 --plant=404 --only=anchos   # rompe algo a propósito: tiene que fallar
 node scripts/pruebas/alturas.js http://localhost:5181           # alto de cada página en 320/375/768/1440/1920
 node scripts/pruebas/shots.js http://localhost:5181/ 375 812 cel  # capturas por tramos (en la carpeta temporal)
 ```
 
-La batería cubre 5 anchos, sin JS, `app.js` bloqueado, movimiento reducido, teclado, contraste calculado, links, menú, filtro, visor con zoom, videoclips, reproductor, copiar (mail y WhatsApp), peso en la red (y que la foto de portada se baje una sola vez), las historias de «lo mejor» (flechas, videos que arrancan solos, barra de scroll, arrastrar y soltar sin abrir la tarjeta, el clic normal sí), la cinta de los videos el choque del reel con el texto en 13 tamaños, el rótulo de la portada (corta entre partes, sin punto colgando) y la nitidez de la foto de portada y la de «Sobre mí» en pantallas de alta densidad. Plantas posibles: `404`, `overflow`, `contrast`, `focus`, `overlap`, `cinta`, `rotulo`, `nitidez`.
+La batería cubre 5 anchos, sin JS, `app.js` bloqueado, movimiento reducido, teclado, contraste calculado, links, menú, filtro, visor con zoom, videoclips, reproductor, copiar (mail y WhatsApp), peso en la red (y que la foto de portada se baje una sola vez), las historias de «lo mejor» (flechas, videos que arrancan solos, barra de scroll, arrastrar y soltar sin abrir la tarjeta, el clic normal sí), la cinta de los videos el choque del reel con el texto en 13 tamaños, el rótulo de la portada (corta entre partes, sin punto colgando) la nitidez de la foto de portada y la de «Sobre mí» en pantallas de alta densidad, y la rotación de la portada (cambia sola y en orden, una sola a la vista, la frenan el botón del showreel y salir de la pantalla, y queda quieta con movimiento reducido y sin JS). Plantas posibles: `404`, `overflow`, `contrast`, `focus`, `overlap`, `cinta`, `rotulo`, `nitidez`, `rotacion`.
 
 Ojo con el puerto: si ya hay un `serve.js` escuchando, puede ser el de otro portfolio. Antes de probar, pedir `/` y mirar el `<title>`.

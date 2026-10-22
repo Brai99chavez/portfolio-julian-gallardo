@@ -178,6 +178,9 @@ html.menu-open, html.is-locked { overflow: hidden; }
 .screen { position: relative; margin: 0; overflow: hidden; border-radius: var(--radius); background: var(--k2); box-shadow: 0 30px 70px -28px rgba(0, 0, 0, .9); }
 .print--hero { height: var(--h); aspect-ratio: 3 / 4; }
 .print--hero img { width: 100%; height: 100%; object-fit: cover; object-position: var(--focus-m); }
+/* las fotos que rotan, apiladas: se ve la que tiene .is-on y pasa a la siguiente con un fundido (app.js) */
+.print--rotate img { position: absolute; inset: 0; transition: opacity .9s ease; }
+.print--rotate img:not(.is-on) { opacity: 0; }
 .reel { position: relative; }
 .reel__win { position: relative; display: block; aspect-ratio: var(--ar, .5625); overflow: hidden; background: var(--k2); }
 .reel__poster, .reel__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }

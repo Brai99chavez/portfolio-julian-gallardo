@@ -8,7 +8,7 @@ Un portfolio para mostrar sus videoclips, su video para marcas y su fotografía 
 
 ## Qué tiene
 
-- Portada con una foto suya filmando en un escenario y su showreel vertical en bucle: sus dos oficios en el primer pantallazo.
+- Portada con fotos de shows que se van alternando solas y su showreel vertical en bucle: sus dos oficios en el primer pantallazo.
 - «Lo mejor»: los trabajos elegidos como historias que se deslizan de costado; los videos arrancan solos al verse.
 - Página de trabajos con filtro: 19 videoclips con su rol (se ven en el sitio), video para marcas, reels para redes y 340 fotos en 8 series (primero las elegidas y, abajo, «Ver las N fotos más»).
 - Visor de fotos con zoom y los datos de cada toma (diafragma, velocidad, ISO y focal).

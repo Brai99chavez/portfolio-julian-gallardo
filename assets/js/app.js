@@ -67,7 +67,10 @@
     };
     v.addEventListener("playing", () => { reel.classList.add("is-playing"); sync(); });
     v.addEventListener("pause", sync);
-    b.addEventListener("click", () => { if (v.paused) { userPaused = false; playVideo(v); } else { userPaused = true; v.pause(); } });
+    b.addEventListener("click", () => {
+      if (v.paused) { userPaused = false; playVideo(v); } else { userPaused = true; v.pause(); }
+      reel.dispatchEvent(new CustomEvent("reel:pausa", { detail: userPaused }));   // lo escucha la foto que rota en la portada
+    });
     const start = () => watch(reel, (on) => { onScreen = on; if (on && !userPaused) playVideo(v); else if (!on && !v.paused) v.pause(); }, threshold);
     if (afterLoad && document.readyState !== "complete") window.addEventListener("load", start, { once: true }); else start();
     document.addEventListener("visibilitychange", () => { if (document.hidden && !v.paused) v.pause(); else if (!document.hidden && onScreen && !userPaused) playVideo(v); });
@@ -76,6 +79,40 @@
   // portada: después del load, para no disputarle la red a la foto grande
   document.querySelectorAll(".reel--hero").forEach((r) => setupReel(r, { threshold: 0, afterLoad: true }));
   document.querySelectorAll(".reel--strip").forEach((r) => setupReel(r, { threshold: 0.5, afterLoad: false }));
+
+  /* portada: la foto va cambiando sola entre las de HERO.images, con un fundido (Braian, 22/10). Arranca después del load y
+     cada foto se baja recién un rato antes de mostrarse. Quieta con movimiento reducido o ahorro de datos (las demás ni se
+     bajan), fuera de pantalla, con la pestaña oculta y con el botón de pausa del showreel, que frena las dos cosas */
+  const rot = document.querySelector(".print--rotate");
+  if (rot && autoplayOK) {
+    const imgs = [...rot.querySelectorAll("img")], every = +rot.dataset.every || 4000, PRE = 1500;
+    let k = 0, timer = 0, gen = 0, started = false, onScreen = !hasIO, userPaused = false;
+    const fetchImg = (i) => {
+      if (i.dataset.src) { i.srcset = i.dataset.srcset; i.src = i.dataset.src; delete i.dataset.src; delete i.dataset.srcset; }
+      return i.decode ? i.decode().catch(() => {}) : Promise.resolve();
+    };
+    const show = (n) => {
+      imgs[k].classList.remove("is-on"); imgs[k].setAttribute("aria-hidden", "true");
+      k = n; imgs[k].classList.add("is-on"); imgs[k].removeAttribute("aria-hidden");
+    };
+    const stop = () => { gen++; clearTimeout(timer); };
+    // un ciclo: a falta de PRE ms baja la que sigue, y al cumplirse el tiempo la muestra (si ya se decodificó; si no, cuando esté)
+    const go = () => {
+      stop();
+      if (!started || userPaused || !onScreen || document.hidden) return;
+      const g = gen, n = (k + 1) % imgs.length;
+      timer = setTimeout(() => {
+        const ready = fetchImg(imgs[n]);
+        timer = setTimeout(() => ready.then(() => { if (g === gen) { show(n); go(); } }), PRE);
+      }, every - PRE);
+    };
+    const reel = document.querySelector(".reel--hero");
+    if (reel) reel.addEventListener("reel:pausa", (e) => { userPaused = e.detail; go(); });
+    watch(rot, (on) => { onScreen = on; go(); });
+    document.addEventListener("visibilitychange", go);
+    const begin = () => { started = true; go(); };
+    if (document.readyState === "complete") begin(); else window.addEventListener("load", begin, { once: true });
+  }
 
   /* «Lo mejor»: las tapas en video (reels verticales) se reproducen solas cuando se ven (Braian: «que usemos videos»), y también
      al pasar el mouse o con el foco. Se mueven más de 5 s: el botón del encabezado las pausa todas (WCAG 2.2.2). Con movimiento

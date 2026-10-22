@@ -59,6 +59,8 @@ const SITE = {
   // Julián (20/10): «agregale CABA … que se entienda que trabajo en capital también y más que nada principalmente». Vive en La Plata.
   location: "CABA y La Plata",
   description: "Julián Gallardo (jottav.), fotógrafo y filmmaker en CABA y La Plata: videoclips, contenido para artistas y marcas, y fotos de shows, moda y casamientos.",
+  // la foto de la imagen para compartir (npm run og): Julián, que es a quien presenta el link. pos = encuadre
+  share: { img: "julian-escenario", pos: "50% 70%" },
 };
 
 /* ---------- portada ---------- */
@@ -67,10 +69,15 @@ const HERO = {
   // se escribe en minúscula y termina con el punto bordó, como su logo «jottav.»
   title: ["videoclips, fotos", "y contenido para", "artistas y marcas"],
   lead: "Dirijo, filmo, monto y coloreo videoclips, y fotografío shows, moda, producto y casamientos, buscando que cada imagen tenga identidad.",
-  // v2 «En vivo»: dos pantallas verticales, una foto y el showreel. La foto es la de Julián filmando con el gimbal en un
-  // escenario (la pidió él en su doc; el archivo llegó el 20/10)
-  image: "julian-escenario",
-  focus: { m: "50% 70%", d: "50% 70%" }, // encuadre: m = celular, d = escritorio
+  // v2 «En vivo»: dos pantallas verticales, una foto y el showreel. Braian (22/10): la foto «se va reemplazando como en loop»
+  // por otras: tres fotos de shows, en este orden (la primera es la que se ve al entrar, sin JS y con movimiento reducido).
+  // focus = encuadre de cada una: m = celular, d = escritorio. Las pausa el mismo botón que el showreel
+  images: [
+    { img: "vivo-humo", focus: { m: "50% 40%", d: "50% 40%" } },
+    { img: "vivo-azul", focus: { m: "50% 55%", d: "50% 55%" } },
+    { img: "vivo-paisley", focus: { m: "50% 35%", d: "50% 35%" } },
+  ],
+  every: 4000,                           // cada cuánto cambia (ms, con un fundido de ~1 s)
   video: "hero-showreel",                // montaje vertical de sus trabajos de video (ver SHOWREEL)
   caption: "Showreel: Aurelius, Aryes y Zambia, 2025–2026",
 };
@@ -94,9 +101,9 @@ const STRIP = ["Lea!", "GZ", "OMAI", "Brunno SR", "Ele De", "Klan", "Esperando e
            boda-alianzas (grano de la iglesia) y vivo-co2 (humo) dan PSNR bajo por la textura, y a ojo son iguales al original (19/10)
    crop = (opcional) recorte en px del original, antes de achicar: saca el subtítulo de la letra quemado en un fotograma */
 const IMAGES = {
-  /* — Julián: las dos que pidió en su doc (20/10). La de la calle es perfil.jpeg sin la gente de atrás (la sacó él) — */
+  /* — Julián: la del escenario (julian/principal.jpeg) fue la portada del 20/10 y desde el 22/10 es la de «Sobre mí».
+       La de la calle (secundaria.jpeg, la que pidió en su doc) salió del sitio ese día: Braian puso la del escenario — */
   "julian-escenario": { g: "julian", f: "principal.jpeg", alt: "Julián Gallardo en blanco y negro, de perfil en un escenario a oscuras, camina filmando con una cámara en un gimbal, entre los telones y dos monitores de piso." },
-  "julian-calle":   { g: "julian", f: "secundaria.jpeg", alt: "Julián Gallardo en blanco y negro, en una calle con niebla, sonríe mientras saca una foto con la cámara contra la cara." },
 
   /* — En vivo (2026) — */
   "vivo-abanico":   { g: "vivo", f: "DSC08900.jpg", alt: "Un rapero con buzo gris canta en la pasarela de un escenario grande, entre un abanico de haces de luz blanca y una pantalla roja; adelante, otro fotógrafo levanta la cámara." },
@@ -110,6 +117,9 @@ const IMAGES = {
   "vivo-cian":      { g: "vivo", f: "IMG_6589.jpg", alt: "Un rapero de gorra canta con el micrófono pegado a la boca y una luz cian que estalla detrás de su cabeza." },
   "vivo-gorra":     { g: "vivo", f: "IMG_3839.jpg", alt: "Una cantante de gorra se tapa la boca con la mano, iluminada de costado por una luz dura y verdosa." },
   "vivo-verde":     { g: "vivo", f: "IMG_2651.jpg", alt: "De perfil, un rapero de gorra clara y campera de tres tiras canta bajo un haz de luz verde y naranja." },
+  // estaba entre las «N fotos más» de En vivo; desde el 22/10 también rota en la portada (Braian la mandó en drive-download,
+  // copia idéntica de la de EVENTOS-sHOWS)
+  "vivo-paisley":   { g: "vivo", f: "DSC_0701.jpg", alt: "En contrapicado, un rapero de gorra paisley y buzo blanco estampado canta con el micrófono en alto, entre luces magenta y un haz cian." },
 
   /* — 808 Trap Party (2024) — */
   "808-platinado":  { g: "vivo", f: "5f7b44207704075.66e1ebbe6b3fd.jpg", alt: "Un artista de pelo platinado y anteojos negros canta con luz magenta y cian en la fiesta 808 Trap Party." },
@@ -377,14 +387,14 @@ for (const p of PROJECTS) {
   p.frames = p.frames.map(realId);
   if (SERIES[p.slug]) { const shown = new Set(p.frames); p.more = SERIES[p.slug].map((x) => realId(x.id)).filter((id) => !shown.has(id)); }
 }
-const mainImages = new Set([HERO.image, ...PROJECTS.flatMap((p) => p.frames), ...FEATURED.flatMap((f) => [f.cover, ...(f.flip || [])])]);
+const mainImages = new Set([...HERO.images.map((h) => h.img), ...PROJECTS.flatMap((p) => p.frames), ...FEATURED.flatMap((f) => [f.cover, ...(f.flip || [])])]);
 for (const p of PROJECTS) for (const id of p.more || []) if (!mainImages.has(id)) IMAGES[id].lite = true;
 
 /* ---------- sobre mí ---------- */
 /* Texto de Julián (su «about me»), con los clichés que él mismo pidió sacar. Los datos son los suyos. */
 const ABOUT = {
-  photo: "julian-calle",  // la pidió Julián (20/10)
-  photoPos: "54% 32%",    // la cara y la cámara, en el recorte 3:4
+  photo: "julian-escenario",  // Braian (22/10): la que era la portada
+  photoPos: "50% 70%",        // Julián entero y los monitores, en el recorte 3:4
   title: "sobre mí",
   paragraphs: [
     "Soy Julián Gallardo, fotógrafo y filmmaker. Nací en Bariloche, vivo en La Plata y soy estudiante avanzado de la Licenciatura en Artes Audiovisuales de la UNLP.",

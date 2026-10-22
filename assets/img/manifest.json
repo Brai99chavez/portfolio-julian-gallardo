@@ -3371,37 +3371,6 @@
    }
   ]
  },
- "en-vivo-dsc-0701": {
-  "w": 1365,
-  "h": 2048,
-  "q": 90,
-  "shot": {
-   "f": "f/2",
-   "t": "1/200 s",
-   "iso": "ISO 800",
-   "mm": "35 mm",
-   "date": "2026-04-30"
-  },
-  "lite": true,
-  "variants": [
-   {
-    "w": 540,
-    "h": 810,
-    "role": "card",
-    "file": "en-vivo-dsc-0701-540w-8c9693ee.webp",
-    "bytes": 55620,
-    "db": 36.9
-   },
-   {
-    "w": 1365,
-    "h": 2048,
-    "role": "big",
-    "file": "en-vivo-dsc-0701-1365w-8022e241.webp",
-    "bytes": 390516,
-    "db": 37.2
-   }
-  ]
- },
  "en-vivo-dsc-0767": {
   "w": 2048,
   "h": 1365,
@@ -12342,29 +12311,6 @@
    }
   ]
  },
- "julian-calle": {
-  "w": 1023,
-  "h": 1538,
-  "q": 90,
-  "variants": [
-   {
-    "w": 540,
-    "h": 812,
-    "role": "card",
-    "file": "julian-calle-540w-b46939c2.webp",
-    "bytes": 44338,
-    "db": 44.9
-   },
-   {
-    "w": 1023,
-    "h": 1538,
-    "role": "card",
-    "file": "julian-calle-1023w-3db2fc24.webp",
-    "bytes": 109706,
-    "db": 45.9
-   }
-  ]
- },
  "julian-escenario": {
   "w": 1023,
   "h": 1537,
@@ -12385,6 +12331,44 @@
     "file": "julian-escenario-1023w-08baaa49.webp",
     "bytes": 52264,
     "db": 47.3
+   }
+  ]
+ },
+ "vivo-paisley": {
+  "w": 1365,
+  "h": 2048,
+  "q": 90,
+  "shot": {
+   "f": "f/2",
+   "t": "1/200 s",
+   "iso": "ISO 800",
+   "mm": "35 mm",
+   "date": "2026-04-30"
+  },
+  "variants": [
+   {
+    "w": 540,
+    "h": 810,
+    "role": "card",
+    "file": "vivo-paisley-540w-8c9693ee.webp",
+    "bytes": 55620,
+    "db": 36.9
+   },
+   {
+    "w": 1080,
+    "h": 1620,
+    "role": "card",
+    "file": "vivo-paisley-1080w-50673984.webp",
+    "bytes": 226638,
+    "db": 36.7
+   },
+   {
+    "w": 1365,
+    "h": 2048,
+    "role": "zoom",
+    "file": "vivo-paisley-1365w-8022e241.webp",
+    "bytes": 390516,
+    "db": 37.2
    }
   ]
  }

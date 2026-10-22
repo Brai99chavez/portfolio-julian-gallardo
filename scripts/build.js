@@ -43,7 +43,7 @@ const isVid = (id) => !!VIDEOS[id];
 const featured = C.FEATURED || [];
 const usedVideos = new Set([C.HERO.video, ...C.PROJECTS.flatMap((p) => [...p.frames.filter(isVid), p.watch && p.watch.video]),
                             ...featured.map((f) => f.cover).filter(isVid)].filter(Boolean));
-const usedImages = new Set([C.HERO.image, C.ABOUT.photo, ...C.PROJECTS.flatMap((p) => [...p.frames, ...(p.more || [])].filter((id) => !isVid(id))),
+const usedImages = new Set([...C.HERO.images.map((h) => h.img), C.ABOUT.photo, C.SITE.share && C.SITE.share.img, ...C.PROJECTS.flatMap((p) => [...p.frames, ...(p.more || [])].filter((id) => !isVid(id))),
                             ...featured.flatMap((f) => [f.cover, ...(f.flip || [])]).filter((id) => !isVid(id)),
                             ...(C.CLIPS || []).flatMap((c) => [c.img, ...(c.flips || [])]),
                             ...((C.SERVICES && C.SERVICES.items) || []).map((s) => s.img)].filter(Boolean));
@@ -96,7 +96,7 @@ function seoHTML(page = "home") {
     lines.push(`<link rel="canonical" href="${SITE_URL}${P.url}" />`, `<meta property="og:url" content="${SITE_URL}${P.url}" />`);
     if (og) lines.push(`<meta property="og:image" content="${SITE_URL}/assets/og.jpg" />`,
                        `<meta property="og:image:width" content="1200" />`, `<meta property="og:image:height" content="630" />`,
-                       `<meta property="og:image:alt" content="${esc(C.IMAGES[HERO.image].alt)}" />`);
+                       `<meta property="og:image:alt" content="${esc(C.IMAGES[(SITE.share && SITE.share.img) || HERO.images[0].img].alt)}" />`);
     const sameAs = C.CONTACT.channels.filter((c) => /instagram|linkedin|behance/.test(c.key) && c.href).map((c) => c.href);
     // SITE.location es donde trabaja (CABA y La Plata), no donde vive: workLocation
     const ld = { "@context": "https://schema.org", "@type": "Person", name: SITE.name, alternateName: SITE.brand + ".",
@@ -109,7 +109,7 @@ function seoHTML(page = "home") {
   return lines.join("\n  ");
 }
 function preloadHTML() {
-  const vs = T.heroSet(T.variantsOf(M, C.HERO.image).vs);
+  const vs = T.heroSet(T.variantsOf(M, C.HERO.images[0].img).vs);   // solo la primera: las otras se bajan después del load
   const srcset = vs.map((v) => `assets/img/${v.file} ${v.w}w`).join(", ");
   return `<link rel="preload" as="image" imagesrcset="${srcset}" imagesizes="${T.HERO_SIZES}" fetchpriority="high" />`;
 }
@@ -201,7 +201,7 @@ if (missing.size) fail(`Las páginas piden ${missing.size} archivo(s) que no est
 
 /* ---- 4) resumen ---- */
 function dirSize(d) { let n = 0; for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); n += e.isDirectory() ? dirSize(p) : fs.statSync(p).size; } return n; }
-const heroCard = T.variantsOf(M, C.HERO.image).vs.filter((v) => v.role === "card").pop();
+const heroCard = T.variantsOf(M, C.HERO.images[0].img).vs.filter((v) => v.role === "card").pop();
 const first = Buffer.byteLength(html) + Buffer.byteLength(css) + Buffer.byteLength(js) + heroCard.bytes;
 /* dos conteos de pendientes (para publicar, los dos en 0). «despu.{1,2}s» y no «despu[eé]s»: en la consola de Windows
    la é ocupa 2 bytes y el corchete NO la encuentra (da un falso cero). */

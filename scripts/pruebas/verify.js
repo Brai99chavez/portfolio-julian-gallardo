@@ -70,10 +70,13 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
       const notLoaded = imgs.filter((i) => !i.complete).length;
       const devs = [...document.querySelectorAll("[data-develop]")].filter((d) => !d.closest("details:not([open])"));
       const undeveloped = devs.filter((d) => !d.classList.contains("is-dev")).length;
-      const running = [...document.querySelectorAll("img")].flatMap((i) => i.getAnimations()).filter((a) => a.playState === "running").length;
+      // las fotos que rotan en la portada tienen su fundido cada 4 s: se prueban aparte (sección «rotacion»)
+      const running = [...document.querySelectorAll("img")].filter((i) => !i.closest(".print--rotate")).flatMap((i) => i.getAnimations()).filter((a) => a.playState === "running").length;
       const filtered = imgs.filter((i) => { const f = getComputedStyle(i).filter; return f && f !== "none"; }).length;
       // ocultas a propósito: los fotogramas que pasan al pasar el mouse, los pósters debajo de un video, la vista previa de «qué hago»
-      const hiddenImgs = imgs.filter((i) => +getComputedStyle(i).opacity < .9 && !i.closest(".flip, .svc-preview") && !/clip__f--[12]/.test(i.className) && !i.classList.contains("reel__poster") && !i.classList.contains("pick__img") && !i.classList.contains("contact__logo")).length;
+      // y las fotos de la portada que esperan su turno (la que está a la vista, .is-on, sí cuenta)
+      const hiddenImgs = imgs.filter((i) => +getComputedStyle(i).opacity < .9 && !i.closest(".flip, .svc-preview") && !/clip__f--[12]/.test(i.className) && !i.classList.contains("reel__poster") && !i.classList.contains("pick__img") && !i.classList.contains("contact__logo")
+        && !(i.closest(".print--rotate") && !i.classList.contains("is-on"))).length;
       // alt vacío a propósito: decorativas o que acompañan a un texto (la tarjeta lleva el título; la miniatura de «qué hago», el sello)
       const altBad = imgs.filter((i) => { const a = i.getAttribute("alt"); if (a === null) return true; if (a === "") return !i.closest(".pick__media, .reel--strip, .nav__brand, .footer, .svc-preview, .menu") && !/svc__thumb|contact__stamp|clip__f--[12]/.test(i.className); return a.length < 12; }).map((i) => i.getAttribute("src"));
       return { over: [...new Set(over)].slice(0, 6), broken, notLoaded, undeveloped, running, filtered, hiddenImgs, altBad, h1: document.querySelectorAll("h1").length, lang: document.documentElement.lang };
@@ -119,7 +122,8 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
   if (!only || only === "sinjs") for (const page of ["/", "/trabajos.html"]) {
     const visibleCheck = () => {
       const bad = [];
-      for (const el of document.querySelectorAll("[data-reveal], .hero__line, .hero__lead, .hero__cta, [data-develop] img, .print--hero img, .tool__ico path")) {
+      // de la portada, la foto a la vista (.is-on): las otras que rotan esperan ocultas a propósito
+      for (const el of document.querySelectorAll("[data-reveal], .hero__line, .hero__lead, .hero__cta, [data-develop] img, .print--hero img.is-on, .tool__ico path")) {
         const cs = getComputedStyle(el);
         if (+cs.opacity < .99 || (cs.strokeDashoffset && el.tagName === "path" && parseFloat(cs.strokeDashoffset) > .01)) bad.push(`${el.tagName.toLowerCase()}.${[...el.classList].join(".")} op=${cs.opacity}`);
       }
@@ -345,19 +349,25 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
     let loadAt = 0;
     p.on("load", () => { loadAt = Date.now(); });
     await p.goto(BASE + "/", { waitUntil: "networkidle0" }); await wait(2500);
-    let total = 0, mp4 = 0, fonts = 0;
-    for (const [id, n] of sizes) { const u = urls.get(id) || ""; if (/fonts\.(googleapis|gstatic)/.test(u)) { fonts += n; continue; } if (/\.mp4/.test(u)) mp4 += n; total += n; }
-    // la foto de portada se lee de la página (cambia con el contenido)
-    const heroId = await p.evaluate(() => (document.querySelector(".print--hero img").getAttribute("src").match(/img\/([a-z0-9-]+?)-\d+w-/) || [])[1] || "—");
+    // las fotos de portada se leen de la página (cambian con el contenido): la primera se ve al entrar; las demás rotan y,
+    // como el reel, se bajan después del load: no cuentan en la primera carga (se informan aparte)
+    const idOf = (u) => (u.match(/img\/([a-z0-9-]+?)-\d+w-/) || [])[1] || "—";
+    const heroIds = (await p.evaluate(() => [...document.querySelectorAll(".print--hero img")].map((i) => i.dataset.src || i.getAttribute("src")))).map(idOf);
+    const heroId = heroIds[0], rotIds = heroIds.slice(1);
+    const isRot = (u) => rotIds.some((r) => u.includes("/img/" + r + "-"));
+    let total = 0, mp4 = 0, fonts = 0, rot = 0;
+    for (const [id, n] of sizes) { const u = urls.get(id) || ""; if (/fonts\.(googleapis|gstatic)/.test(u)) { fonts += n; continue; } if (isRot(u)) { rot += n; continue; } if (/\.mp4/.test(u)) mp4 += n; total += n; }
     const heroImgDone = done.find((d) => d.url && d.url.includes("/" + heroId + "-"));
     const firstMp4 = p._req.find((r) => /\.mp4/.test(r.url));
-    ok(`peso primera carga ${w}px @${dpr}x (sin tipografías)`, total - mp4 <= 1.1 * 1048576, `${(total / 1048576).toFixed(2)} MB en total · ${(mp4 / 1048576).toFixed(2)} MB de video · tipografías ${(fonts / 1024).toFixed(0)} KB`);
+    const rotReqs = p._req.filter((r) => isRot(r.url));
+    ok(`peso primera carga ${w}px @${dpr}x (sin tipografías)`, total - mp4 <= 1.1 * 1048576, `${(total / 1048576).toFixed(2)} MB en total · ${(mp4 / 1048576).toFixed(2)} MB de video · tipografías ${(fonts / 1024).toFixed(0)} KB · fotos que rotan (aparte) ${(rot / 1024).toFixed(0)} KB`);
     ok(`${w}px @${dpr}x: el reel de portada se pide después del load y de la foto`, !firstMp4 || (firstMp4.t >= loadAt - 5 && (!heroImgDone || firstMp4.t >= heroImgDone.t - 5)), firstMp4 ? `mp4 a ${firstMp4.t - loadAt} ms del load` : "no se pidió");
+    if (rotIds.length) ok(`${w}px @${dpr}x: las otras fotos de portada se piden después del load`, rotReqs.every((r) => r.t >= loadAt - 5), rotReqs.length ? `a ${rotReqs.map((r) => r.t - loadAt).join(", ")} ms del load` : "todavía no se pidieron");
     // si la precarga y el <img> no piden el mismo ancho, el navegador baja la foto de portada dos veces
     const heroReqs = [...new Set([...urls.values()].filter((u) => u.includes("/img/" + heroId + "-")).map((u) => u.split("?")[0]))];
     const pre = await p.evaluate(() => ({ pre: document.querySelector('link[rel="preload"][as="image"]')?.getAttribute("imagesizes"), img: document.querySelector(".print--hero img").getAttribute("sizes") }));
     ok(`${w}px @${dpr}x: la portada se baja una sola vez (precarga = la que se usa)`, heroReqs.length === 1 && pre.pre === pre.img, `${heroReqs.map((u) => u.split("/").pop()).join(", ")} · preload «${pre.pre}» · img «${pre.img}»`);
-    const bigs = [...urls.values()].filter((u) => /-(2200|2880|2160|1920|1440)w-/.test(u) && !u.includes("/" + heroId + "-"));
+    const bigs = [...urls.values()].filter((u) => /-(2200|2880|2160|1920|1440)w-/.test(u) && !heroIds.some((h) => u.includes("/img/" + h + "-")));
     ok(`${w}px @${dpr}x: no se bajan versiones grandes del visor sin abrirlo`, !bigs.length, bigs.slice(0, 3).join(", "));
     await p.close();
   }
@@ -521,6 +531,71 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
         ok(`nitidez ${w}px @${dpr}x ${sel.split(" ")[0]}: la foto no se estira de más`, r.nat >= cap * 0.9,
           `${r.nat} px servidos para ${r.need} px de pantalla · original ${src} px (${r.file})${r.need > src * 1.1 ? " · la original no alcanza para esta pantalla" : ""}`);
       }
+      await p.close();
+    }
+  }
+
+  /* 10) la foto de la portada rota entre las de HERO.images (Braian, 22/10): una sola a la vista, cambia sola en orden,
+     el botón del showreel la frena y la vuelve a arrancar, fuera de pantalla se queda quieta; con movimiento reducido no
+     rota y las otras ni se bajan; sin JS se ve la primera. Se mide a mitad de camino entre dos cambios (el fundido ya terminó) */
+  if (!only || only === "rotacion") {
+    const state = () => [...document.querySelectorAll(".print--hero img")].map((i) => ({
+      on: i.classList.contains("is-on"), op: +getComputedStyle(i).opacity, aria: i.getAttribute("aria-hidden") !== "true", bajada: !i.getAttribute("src").startsWith("data:") }));
+    const activa = (s) => s.findIndex((x) => x.on);
+    const sana = (s) => s.filter((x) => x.op > 0.5).length === 1 && s.filter((x) => x.on).length === 1 && s[activa(s)].op > 0.99 && s.every((x) => x.aria === x.on);
+    // planta: todas a la vista a la vez (como si faltara el CSS que esconde las que esperan)
+    const plantar = async (p) => { if (PLANT === "rotacion") await p.addStyleTag({ content: ".print--rotate img{opacity:1!important}" }); };
+    {
+      const p = await newPage(b, 1440, 900);
+      await p.goto(BASE + "/", { waitUntil: "load" }); await plantar(p);
+      const { every, n, label } = await p.evaluate(() => ({ every: +document.querySelector(".print--rotate").dataset.every, n: document.querySelectorAll(".print--hero img").length,
+        label: document.querySelector(".reel--hero .reel__pause").getAttribute("aria-label") }));
+      await wait(every / 2);
+      const muestras = [];
+      for (let j = 0; j <= n; j++) { muestras.push(await p.evaluate(state)); if (j < n) await wait(every); }
+      const orden = muestras.map(activa);
+      ok("rotación 1440: cambia sola, en orden y vuelve a la primera", orden.join() === [...Array(n).keys(), 0].join(), `orden ${orden.join(" → ")} · cada ${every} ms`);
+      ok("rotación 1440: siempre una sola foto a la vista, y solo esa sin aria-hidden", muestras.every(sana), JSON.stringify(muestras.find((s) => !sana(s)) || "ok"));
+      ok("rotación 1440: el botón de pausa dice que frena las fotos", /fotos/.test(label), label);
+      // el botón del showreel la frena…
+      await p.click(".reel--hero .reel__pause");
+      const quieta = activa(await p.evaluate(state));
+      await wait(every * 2);
+      const sigue = activa(await p.evaluate(state));
+      const lbl = await p.evaluate(() => document.querySelector(".reel--hero .reel__pause").getAttribute("aria-label"));
+      ok("rotación 1440: el botón de pausa la frena", sigue === quieta, `antes ${quieta} · ${every * 2} ms después ${sigue} · «${lbl}»`);
+      // …y la vuelve a arrancar
+      await p.click(".reel--hero .reel__pause");
+      await wait(every * 1.5);
+      const despues = activa(await p.evaluate(state));
+      ok("rotación 1440: al volver a apretar, sigue rotando", despues !== sigue, `${sigue} → ${despues}`);
+      // fuera de pantalla no cambia
+      await p.evaluate(() => window.scrollTo({ top: 2400, behavior: "instant" })); await wait(300);
+      const abajo = activa(await p.evaluate(state));
+      await wait(every * 2);
+      const abajo2 = activa(await p.evaluate(state));
+      await p.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" })); await wait(every * 1.5);
+      const arriba = activa(await p.evaluate(state));
+      ok("rotación 1440: fuera de pantalla se queda quieta y al volver sigue", abajo2 === abajo && arriba !== abajo2, `abajo ${abajo} → ${abajo2} · arriba ${arriba}`);
+      await p.close();
+    }
+    {
+      const p = await newPage(b, 375, 812, { reduce: true });
+      await p.goto(BASE + "/", { waitUntil: "load" }); await plantar(p);
+      const every = await p.evaluate(() => +document.querySelector(".print--rotate").dataset.every);
+      await wait(every * 1.6);
+      const s = await p.evaluate(state);
+      const pedidas = p._req.filter((r) => /\/img\//.test(r.url)).map((r) => r.url);
+      const otras = await p.evaluate(() => [...document.querySelectorAll(".print--hero img")].slice(1).map((i) => (i.dataset.src || "").match(/img\/([a-z0-9-]+?)-\d+w-/)?.[1]).filter(Boolean));
+      ok("rotación con movimiento reducido: queda quieta en la primera y las otras no se bajan",
+        activa(s) === 0 && sana(s) && s.slice(1).every((x) => !x.bajada) && otras.length === s.length - 1 && !pedidas.some((u) => otras.some((o) => u.includes("/img/" + o + "-"))), JSON.stringify({ s, otras }));
+      await p.close();
+    }
+    {
+      const p = await newPage(b, 375, 812, { js: false });
+      await p.goto(BASE + "/", { waitUntil: "networkidle0" }); await plantar(p);
+      const s = await p.evaluate(state);
+      ok("rotación sin JS: se ve la primera y nada más", activa(s) === 0 && sana(s) && s.slice(1).every((x) => !x.bajada), JSON.stringify(s));
       await p.close();
     }
   }
