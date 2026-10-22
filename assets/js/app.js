@@ -81,13 +81,13 @@
   document.querySelectorAll(".reel--strip").forEach((r) => setupReel(r, { threshold: 0.5, afterLoad: false }));
 
   /* portada: la foto va cambiando sola entre las de HERO.images (Braian, 22/10): se acerca despacio mientras se ve y cambia
-     con un obturador (site.css). Arranca después del load y cada foto se baja recién un rato antes de mostrarse. Quieta con
+     con un diafragma de lente. Arranca después del load y cada foto se baja recién un rato antes de mostrarse. Quieta con
      movimiento reducido o ahorro de datos (las demás ni se bajan), fuera de pantalla, con la pestaña oculta y con el botón
      de pausa del showreel, que frena las dos cosas */
   const rot = document.querySelector(".print--rotate");
   if (rot && autoplayOK) {
-    // CLOSE = lo que tardan las cortinas en cerrarse (site.css, .is-shut): la foto cambia debajo, con el obturador cerrado
-    const imgs = [...rot.querySelectorAll("img")], every = +rot.dataset.every || 4000, PRE = 1500, CLOSE = 150;
+    // CLOSE / OPEN = lo que tarda el diafragma en cerrarse y en abrirse (ms); la foto cambia con el diafragma cerrado
+    const imgs = [...rot.querySelectorAll("img")], every = +rot.dataset.every || 4000, PRE = 1500, CLOSE = 380, OPEN = 460;
     let k = 0, timer = 0, gen = 0, started = false, onScreen = !hasIO, userPaused = false;
     const fetchImg = (i) => {
       if (i.dataset.src) { i.srcset = i.dataset.srcset; i.src = i.dataset.src; delete i.dataset.src; delete i.dataset.srcset; }
@@ -97,10 +97,43 @@
       imgs[k].classList.remove("is-on"); imgs[k].setAttribute("aria-hidden", "true");
       k = n; imgs[k].classList.add("is-on"); imgs[k].removeAttribute("aria-hidden");
     };
-    // el obturador: se cierra, cambia la foto y se abre. Termina siempre (aunque se pause a mitad): nunca queda cerrado
-    const shutter = (n, then) => {
-      rot.classList.add("is-shut");
-      setTimeout(() => { show(n); rot.classList.remove("is-shut"); then(); }, CLOSE);
+    // el diafragma: un SVG encima de la foto, negro, con una abertura hexagonal. Cada lado de la abertura sigue de largo más
+    // allá del vértice (el borde de una hoja), y eso es lo que lo hace leer como una lente y no como un hexágono
+    const NS = "http://www.w3.org/2000/svg", iris = document.createElementNS(NS, "svg");
+    const blades = document.createElementNS(NS, "path"), edges = document.createElementNS(NS, "path");
+    iris.setAttribute("class", "iris"); iris.setAttribute("aria-hidden", "true"); iris.setAttribute("focusable", "false");
+    iris.setAttribute("preserveAspectRatio", "none");
+    blades.setAttribute("class", "iris__blades"); edges.setAttribute("class", "iris__edges");
+    iris.append(blades, edges); rot.append(iris);
+    const f1 = (n) => n.toFixed(1);
+    const draw = (w, h, r, a) => {
+      const cx = w / 2, cy = h / 2, far = (w + h) * 2;
+      const v = [0, 1, 2, 3, 4, 5].map((i) => [cx + r * Math.cos(a + i * Math.PI / 3), cy + r * Math.sin(a + i * Math.PI / 3)]);
+      blades.setAttribute("d", `M0 0H${w}V${h}H0Z M${v.map((p) => `${f1(p[0])} ${f1(p[1])}`).join("L")}Z`);
+      edges.setAttribute("d", v.map((p, i) => {
+        const q = v[(i + 1) % 6], dx = q[0] - p[0], dy = q[1] - p[1], L = Math.hypot(dx, dy) || 1;
+        return `M${f1(p[0])} ${f1(p[1])}L${f1(q[0] + dx / L * far)} ${f1(q[1] + dy / L * far)}`;
+      }).join(""));
+    };
+    // se cierra girando 30°, cambia la foto, se abre girando otros 30° (el hexágono queda igual que al empezar).
+    // Termina siempre, aunque se pause a mitad: nunca queda cerrado
+    const diafragma = (n, then) => {
+      const w = rot.clientWidth, h = rot.clientHeight, R = Math.hypot(w, h) / 2 / Math.cos(Math.PI / 6) + 2;   // abierto = no tapa ni las puntas
+      iris.setAttribute("viewBox", `0 0 ${w} ${h}`);
+      draw(w, h, R, 0); rot.classList.add("is-iris");
+      const t0 = performance.now(); let swapped = false;
+      const frame = (now) => {
+        const t = now - t0;
+        if (t < CLOSE) { const p = Math.pow(t / CLOSE, 3); draw(w, h, R * (1 - p), p * Math.PI / 6); }
+        else {
+          if (!swapped) { swapped = true; show(n); }
+          const u = Math.min(1, (t - CLOSE) / OPEN), p = 1 - Math.pow(1 - u, 3);
+          draw(w, h, R * p, (1 + p) * Math.PI / 6);
+          if (u >= 1) { rot.classList.remove("is-iris"); then(); return; }
+        }
+        requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
     };
     const stop = () => { gen++; clearTimeout(timer); };
     // un ciclo: a falta de PRE ms baja la que sigue, y al cumplirse el tiempo la muestra (si ya se decodificó; si no, cuando esté)
@@ -110,10 +143,12 @@
       rot.classList.toggle("is-paused", !run);   // el zoom lento también se frena
       if (!run) return;
       const g = gen, n = (k + 1) % imgs.length;
+      // el diafragma entra en el tiempo de la foto: de un cambio al siguiente pasan «every» ms (lo mismo que dura el zoom)
+      const lead = Math.max(PRE, every - CLOSE - OPEN);
       timer = setTimeout(() => {
         const ready = fetchImg(imgs[n]);
-        timer = setTimeout(() => ready.then(() => { if (g === gen) shutter(n, () => { if (g === gen) go(); }); }), PRE);
-      }, every - PRE);
+        timer = setTimeout(() => ready.then(() => { if (g === gen) diafragma(n, () => { if (g === gen) go(); }); }), PRE);
+      }, lead - PRE);
     };
     const reel = document.querySelector(".reel--hero");
     if (reel) reel.addEventListener("reel:pausa", (e) => { userPaused = e.detail; go(); });

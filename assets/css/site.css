@@ -174,20 +174,22 @@ html.menu-open, html.is-locked { overflow: hidden; }
 /* celular: el alto de las pantallas sale de la cuenta para que título y botones entren sin bajar en 360×640 y 375×667.
    100svh - 468px = lo que queda después de la barra, el rótulo (dos renglones desde que dice «CABA y La Plata»), el título,
    la bajada y los botones en 360 px; manda solo en pantallas de menos de ~670 px de alto, y nunca baja del 27svh */
-.hero__screens { --h: min(30svh, 253px, max(100svh - 468px, 27svh)); position: relative; display: flex; align-items: flex-start; gap: 10px; flex-wrap: wrap; order: -1; }
+/* en los celulares bajos el alto manda y las dos pantallas no llegan a llenar el ancho: centradas, para que no quede un
+   hueco de 60–80 px a la derecha (Braian, 22/10: «en mobile ¿no se ve medio raro?») */
+.hero__screens { --h: min(30svh, 253px, max(100svh - 468px, 27svh)); position: relative; display: flex; align-items: flex-start; justify-content: center; gap: 10px; flex-wrap: wrap; order: -1; }
 .screen { position: relative; margin: 0; overflow: hidden; border-radius: var(--radius); background: var(--k2); box-shadow: 0 30px 70px -28px rgba(0, 0, 0, .9); }
 .print--hero { height: var(--h); aspect-ratio: 3 / 4; }
 .print--hero img { width: 100%; height: 100%; object-fit: cover; object-position: var(--focus-m); }
-/* las fotos que rotan, apiladas: se ve la que tiene .is-on. El cambio es un obturador (Braian, 22/10): dos cortinas negras
-   se cierran (.is-shut), la foto cambia debajo y se abren. Mientras se ve, la foto se acerca despacio. Todo lo arranca
+/* las fotos que rotan, apiladas: se ve la que tiene .is-on. El cambio es un diafragma de lente (Braian, 22/10): una abertura
+   de seis hojas que gira mientras se cierra, la foto cambia con el diafragma cerrado y se vuelve a abrir. Lo dibuja app.js
+   en un SVG (.iris) que solo se ve mientras dura (.is-iris). Mientras se ve, la foto se acerca despacio. Todo lo arranca
    app.js (.is-running) y lo frena con .is-paused: sin JS o con movimiento reducido, la primera quieta */
 .print--rotate img { position: absolute; inset: 0; }
 .print--rotate img:not(.is-on) { opacity: 0; }
-.print--rotate::before, .print--rotate::after { content: ""; position: absolute; left: 0; right: 0; z-index: 1; height: 50%; background: var(--k);
-  pointer-events: none; transition: transform .22s cubic-bezier(.2, .7, .3, 1); }
-.print--rotate::before { top: 0; transform: translateY(-101%); box-shadow: inset 0 -1px rgba(255, 255, 255, .1); }
-.print--rotate::after { bottom: 0; transform: translateY(101%); box-shadow: inset 0 1px rgba(255, 255, 255, .1); }
-.print--rotate.is-shut::before, .print--rotate.is-shut::after { transform: none; transition-duration: .14s; transition-timing-function: cubic-bezier(.6, 0, .9, .4); }
+.iris { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; visibility: hidden; }
+.print--rotate.is-iris .iris { visibility: visible; }
+.iris__blades { fill: var(--k); fill-rule: evenodd; }
+.iris__edges { fill: none; stroke: rgba(255, 255, 255, .16); stroke-width: 1.2; }
 @keyframes push { from { transform: scale(1); } to { transform: scale(1.06); } }
 .print--rotate.is-running img.is-on { animation: push var(--every, 4000ms) linear forwards; }
 .print--rotate.is-paused img.is-on { animation-play-state: paused; }
