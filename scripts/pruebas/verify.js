@@ -543,27 +543,44 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
       on: i.classList.contains("is-on"), op: +getComputedStyle(i).opacity, aria: i.getAttribute("aria-hidden") !== "true", bajada: !i.getAttribute("src").startsWith("data:") }));
     const activa = (s) => s.findIndex((x) => x.on);
     const sana = (s) => s.filter((x) => x.op > 0.5).length === 1 && s.filter((x) => x.on).length === 1 && s[activa(s)].op > 0.99 && s.every((x) => x.aria === x.on);
-    // planta: todas a la vista a la vez (como si faltara el CSS que esconde las que esperan)
-    const plantar = async (p) => { if (PLANT === "rotacion") await p.addStyleTag({ content: ".print--rotate img{opacity:1!important}" }); };
+    // el obturador (::before y ::after): entre cambios, las dos cortinas tienen que estar afuera del recuadro, enteras
+    const cortinas = () => {
+      const r = document.querySelector(".print--rotate");
+      const afuera = (pe) => { const cs = getComputedStyle(r, pe); return Math.abs(new DOMMatrixReadOnly(cs.transform).m42) >= parseFloat(cs.height) - 1; };
+      return !r.classList.contains("is-shut") && afuera("::before") && afuera("::after");
+    };
+    // el zoom lento de la foto a la vista: «running», «paused» o «ninguno»
+    const zoom = () => { const a = document.querySelector(".print--rotate img.is-on").getAnimations().find((x) => x.animationName === "push"); return a ? a.playState : "ninguno"; };
+    // plantas: «rotacion» = todas a la vista a la vez (como si faltara el CSS que esconde las que esperan);
+    // «obturador» = las cortinas trabadas en el medio
+    const plantar = async (p) => {
+      if (PLANT === "rotacion") await p.addStyleTag({ content: ".print--rotate img{opacity:1!important}" });
+      if (PLANT === "obturador") await p.addStyleTag({ content: ".print--rotate::before,.print--rotate::after{transform:none!important}" });
+    };
     {
       const p = await newPage(b, 1440, 900);
       await p.goto(BASE + "/", { waitUntil: "load" }); await plantar(p);
       const { every, n, label } = await p.evaluate(() => ({ every: +document.querySelector(".print--rotate").dataset.every, n: document.querySelectorAll(".print--hero img").length,
         label: document.querySelector(".reel--hero .reel__pause").getAttribute("aria-label") }));
       await wait(every / 2);
-      const muestras = [];
-      for (let j = 0; j <= n; j++) { muestras.push(await p.evaluate(state)); if (j < n) await wait(every); }
+      const muestras = [], obt = [], zooms = [];
+      for (let j = 0; j <= n; j++) {
+        muestras.push(await p.evaluate(state)); obt.push(await p.evaluate(cortinas)); zooms.push(await p.evaluate(zoom));
+        if (j < n) await wait(every);
+      }
       const orden = muestras.map(activa);
       ok("rotación 1440: cambia sola, en orden y vuelve a la primera", orden.join() === [...Array(n).keys(), 0].join(), `orden ${orden.join(" → ")} · cada ${every} ms`);
       ok("rotación 1440: siempre una sola foto a la vista, y solo esa sin aria-hidden", muestras.every(sana), JSON.stringify(muestras.find((s) => !sana(s)) || "ok"));
+      ok("rotación 1440: entre cambios el obturador queda abierto", obt.every(Boolean), obt.join(", "));
+      ok("rotación 1440: la foto a la vista se acerca despacio (zoom corriendo)", zooms.every((z) => z === "running"), zooms.join(", "));
       ok("rotación 1440: el botón de pausa dice que frena las fotos", /fotos/.test(label), label);
-      // el botón del showreel la frena…
+      // el botón del showreel la frena (también el zoom)…
       await p.click(".reel--hero .reel__pause");
       const quieta = activa(await p.evaluate(state));
       await wait(every * 2);
-      const sigue = activa(await p.evaluate(state));
+      const sigue = activa(await p.evaluate(state)), zPausa = await p.evaluate(zoom), oPausa = await p.evaluate(cortinas);
       const lbl = await p.evaluate(() => document.querySelector(".reel--hero .reel__pause").getAttribute("aria-label"));
-      ok("rotación 1440: el botón de pausa la frena", sigue === quieta, `antes ${quieta} · ${every * 2} ms después ${sigue} · «${lbl}»`);
+      ok("rotación 1440: el botón de pausa la frena", sigue === quieta && zPausa === "paused" && oPausa, `antes ${quieta} · ${every * 2} ms después ${sigue} · zoom ${zPausa} · obturador abierto ${oPausa} · «${lbl}»`);
       // …y la vuelve a arrancar
       await p.click(".reel--hero .reel__pause");
       await wait(every * 1.5);
@@ -587,15 +604,16 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
       const s = await p.evaluate(state);
       const pedidas = p._req.filter((r) => /\/img\//.test(r.url)).map((r) => r.url);
       const otras = await p.evaluate(() => [...document.querySelectorAll(".print--hero img")].slice(1).map((i) => (i.dataset.src || "").match(/img\/([a-z0-9-]+?)-\d+w-/)?.[1]).filter(Boolean));
-      ok("rotación con movimiento reducido: queda quieta en la primera y las otras no se bajan",
-        activa(s) === 0 && sana(s) && s.slice(1).every((x) => !x.bajada) && otras.length === s.length - 1 && !pedidas.some((u) => otras.some((o) => u.includes("/img/" + o + "-"))), JSON.stringify({ s, otras }));
+      const z = await p.evaluate(zoom), o = await p.evaluate(cortinas);
+      ok("rotación con movimiento reducido: queda quieta en la primera, sin zoom, y las otras no se bajan",
+        activa(s) === 0 && sana(s) && z === "ninguno" && o && s.slice(1).every((x) => !x.bajada) && otras.length === s.length - 1 && !pedidas.some((u) => otras.some((o) => u.includes("/img/" + o + "-"))), JSON.stringify({ s, otras, zoom: z, obturadorAbierto: o }));
       await p.close();
     }
     {
       const p = await newPage(b, 375, 812, { js: false });
       await p.goto(BASE + "/", { waitUntil: "networkidle0" }); await plantar(p);
-      const s = await p.evaluate(state);
-      ok("rotación sin JS: se ve la primera y nada más", activa(s) === 0 && sana(s) && s.slice(1).every((x) => !x.bajada), JSON.stringify(s));
+      const s = await p.evaluate(state), z = await p.evaluate(zoom), o = await p.evaluate(cortinas);
+      ok("rotación sin JS: se ve la primera, quieta, y nada más", activa(s) === 0 && sana(s) && z === "ninguno" && o && s.slice(1).every((x) => !x.bajada), JSON.stringify({ s, zoom: z, obturadorAbierto: o }));
       await p.close();
     }
   }

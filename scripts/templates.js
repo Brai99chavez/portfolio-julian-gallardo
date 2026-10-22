@@ -173,7 +173,7 @@ function heroHTML(C, M, V) {
         </div>
       </div>
       <div class="hero__screens">
-        <figure class="screen print--hero${rotate ? " print--rotate" : ""}"${rotate ? ` data-every="${+HERO.every || 4000}"` : ""}>${shots}
+        <figure class="screen print--hero${rotate ? " print--rotate" : ""}"${rotate ? ` data-every="${+HERO.every || 4000}" style="--every:${+HERO.every || 4000}ms"` : ""}>${shots}
         </figure>${reel}
         <p class="hero__cap">${esc(HERO.caption)}</p>
       </div>
