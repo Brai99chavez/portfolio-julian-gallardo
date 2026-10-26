@@ -24,7 +24,7 @@ const all = [];
 for (const f of all) {
   if (/(^|\/)(1 CARPETA PARA BRAI|contenido|_originales|_analisis|_versiones|_fuentes|scripts|node_modules)(\/|$)/.test(f)) bad(`viaja una carpeta interna: ${f}`);
   if (/(^|\/)content\.js$|\.md$|\.zip$/.test(f)) bad(`viaja un archivo interno: ${f}`);
-  if (/^assets\/img\//.test(f) && !/^assets\/img\/[a-z0-9-]+-\d+w-[0-9a-f]{8}\.webp$/.test(f)) bad(`imagen sin optimizar o sin hash: ${f}`);
+  if (/^assets\/img\//.test(f) && !/^assets\/img\/(?:[a-z0-9-]+\/)?[a-z0-9-]+-\d+w-[0-9a-f]{8}\.webp$/.test(f)) bad(`imagen sin optimizar o sin hash: ${f}`);
   if (/^assets\/video\//.test(f) && !/^assets\/video\/[a-z0-9-]+-[0-9a-f]{8}\.(mp4|webp)$/.test(f)) bad(`video sin optimizar o sin hash: ${f}`);
   if (/\.(jpe?g|png|heic|mov)$/i.test(f) && f !== "assets/og.jpg") bad(`original sin optimizar: ${f}`);
 }

@@ -8,7 +8,7 @@ index.html            plantilla de la página principal (marcadores <!--BUILD:x-
 trabajos.html         plantilla de la página de trabajos
 assets/css/site.css   el diseño (v2 «En vivo», con la paleta de Julián en tokens al principio del archivo)
 assets/js/app.js      la interactividad (el sitio se ve completo sin JS)
-assets/img/           fotos optimizadas (las genera npm run optimize) + manifest.json
+assets/img/<tipo>/    fotos optimizadas, ordenadas en subcarpetas (las genera npm run fotos) + manifest.json
 assets/video/         videos optimizados (npm run optimize:video) + manifest.json
 assets/brand/         el sello y el logo de jottav.
 assets/og.jpg         imagen para compartir (npm run og)
@@ -24,7 +24,9 @@ No se publican ni van al repo: `1 CARPETA PARA BRAI/` (los originales de Julián
 |---|---|
 | `npm install` | instala `sharp` (una vez) |
 | `npm run youtube` | baja los fotogramas de los videoclips que se usan de tapa (a `_fuentes/youtube/`) |
-| `npm run optimize` | genera las fotos del sitio (WebP q90, tres tamaños, sin EXIF; mide la pérdida) |
+| `npm run fotos` | **mira «1 CARPETA PARA BRAI», optimiza solo lo nuevo o cambiado, limpia lo que ya no está y rearma el sitio** (modo revisión). Es el de uso diario |
+| `npm run serie -- "Nombre"` | crea una carpeta nueva en `fotos/` con un `serie.json` para completar |
+| `npm run optimize` | regenera TODAS las fotos desde cero (lento): genera las fotos del sitio (WebP q90, tres tamaños, sin EXIF; mide la pérdida) |
 | `npm run showreel` | monta el showreel de la portada con los tramos de `SHOWREEL` (a `_fuentes/video/`; después, `npm run optimize:video`) |
 | `npm run optimize:video` | genera los videos (H.264 720p, bucles mudos, piezas completas con sonido) |
 | `npm run build:revision` | arma `dist/` en **modo revisión** (no indexable: para mostrárselo a Julián) |
@@ -36,6 +38,16 @@ No se publican ni van al repo: `1 CARPETA PARA BRAI/` (los originales de Julián
 | `npm run diseno -- lista \| guardar <n> \| restaurar <n>` | guarda o vuelve a una versión del diseño (nunca toca `content.js`) |
 
 Versiones del diseño guardadas: ninguna (la v1 «Revelado» se borró entera el 20/10, por pedido de Braian). Ojo: `disenos.js` guarda las plantillas, el CSS, el JS y los scripts del build, no `content.js` ni `scripts/showreel.js`.
+
+## Sumar fotos sin tocar código (2026-10-26)
+
+Instrucciones para quien no programa: `1 CARPETA PARA BRAI/LEEME.txt`. En corto:
+- **Foto nueva en una carpeta que ya existe:** copiarla y `npm run fotos` → se suma al trabajo que más fotos de esa carpeta tiene (al desplegable «Ver las N fotos más»); `serie.json` con `destino` la manda a otro.
+- **Carpeta nueva dentro de «fotos»:** `npm run fotos` arma sola un **trabajo nuevo** (categoría Fotografía) con el nombre de la carpeta. `serie.json` opcional: título, intro, tipo, año, lugar, roles, orden, destacadas, descripciones.
+- **No publicar una foto:** `NO_` adelante del nombre.
+- **Lo nuevo** = lo que llegó después de `fotos-vistas.json` (la lista de todo lo que había al instalar esto; se arma con `npm run fotos -- --baseline`, una sola vez). Las fotos que ya estaban y no se usan siguen sin usarse.
+- Cómo funciona: `scripts/galeria.js` lee las carpetas (módulo común de Portfolios: `REGLAS/modulo-carga-de-fotos/`) y `content.js` suma lo que encuentra a `IMAGES` y `PROJECTS`; los grupos de `GROUPS` son rutas EXACTAS (antes se buscaban por prefijo y una carpeta nueva con el mismo comienzo rompía todo); el optimizador anota el tamaño y la fecha del original (`src`) para saber qué cambió y deja las salidas en `assets/img/<tipo>/`.
+- Los videos y videoclips siguen declarándose a mano en `content.js`.
 
 ## Editar contenido
 

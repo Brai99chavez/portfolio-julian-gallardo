@@ -351,10 +351,10 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
     await p.goto(BASE + "/", { waitUntil: "networkidle0" }); await wait(2500);
     // las fotos de portada se leen de la página (cambian con el contenido): la primera se ve al entrar; las demás rotan y,
     // como el reel, se bajan después del load: no cuentan en la primera carga (se informan aparte)
-    const idOf = (u) => (u.match(/img\/([a-z0-9-]+?)-\d+w-/) || [])[1] || "—";
+    const idOf = (u) => (u.match(/img\/(?:[a-z0-9-]+\/)?([a-z0-9-]+?)-\d+w-/) || [])[1] || "—";
     const heroIds = (await p.evaluate(() => [...document.querySelectorAll(".print--hero img")].map((i) => i.dataset.src || i.getAttribute("src")))).map(idOf);
     const heroId = heroIds[0], rotIds = heroIds.slice(1);
-    const isRot = (u) => rotIds.some((r) => u.includes("/img/" + r + "-"));
+    const isRot = (u) => rotIds.some((r) => u.includes("/" + r + "-"));
     let total = 0, mp4 = 0, fonts = 0, rot = 0;
     for (const [id, n] of sizes) { const u = urls.get(id) || ""; if (/fonts\.(googleapis|gstatic)/.test(u)) { fonts += n; continue; } if (isRot(u)) { rot += n; continue; } if (/\.mp4/.test(u)) mp4 += n; total += n; }
     const heroImgDone = done.find((d) => d.url && d.url.includes("/" + heroId + "-"));
@@ -364,10 +364,10 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
     ok(`${w}px @${dpr}x: el reel de portada se pide después del load y de la foto`, !firstMp4 || (firstMp4.t >= loadAt - 5 && (!heroImgDone || firstMp4.t >= heroImgDone.t - 5)), firstMp4 ? `mp4 a ${firstMp4.t - loadAt} ms del load` : "no se pidió");
     if (rotIds.length) ok(`${w}px @${dpr}x: las otras fotos de portada se piden después del load`, rotReqs.every((r) => r.t >= loadAt - 5), rotReqs.length ? `a ${rotReqs.map((r) => r.t - loadAt).join(", ")} ms del load` : "todavía no se pidieron");
     // si la precarga y el <img> no piden el mismo ancho, el navegador baja la foto de portada dos veces
-    const heroReqs = [...new Set([...urls.values()].filter((u) => u.includes("/img/" + heroId + "-")).map((u) => u.split("?")[0]))];
+    const heroReqs = [...new Set([...urls.values()].filter((u) => u.includes("/" + heroId + "-")).map((u) => u.split("?")[0]))];
     const pre = await p.evaluate(() => ({ pre: document.querySelector('link[rel="preload"][as="image"]')?.getAttribute("imagesizes"), img: document.querySelector(".print--hero img").getAttribute("sizes") }));
     ok(`${w}px @${dpr}x: la portada se baja una sola vez (precarga = la que se usa)`, heroReqs.length === 1 && pre.pre === pre.img, `${heroReqs.map((u) => u.split("/").pop()).join(", ")} · preload «${pre.pre}» · img «${pre.img}»`);
-    const bigs = [...urls.values()].filter((u) => /-(2200|2880|2160|1920|1440)w-/.test(u) && !heroIds.some((h) => u.includes("/img/" + h + "-")));
+    const bigs = [...urls.values()].filter((u) => /-(2200|2880|2160|1920|1440)w-/.test(u) && !heroIds.some((h) => u.includes("/" + h + "-")));
     ok(`${w}px @${dpr}x: no se bajan versiones grandes del visor sin abrirlo`, !bigs.length, bigs.slice(0, 3).join(", "));
     await p.close();
   }
@@ -622,10 +622,10 @@ const lum = (c) => { const m = rgbOf(c); const f = (v) => { v /= 255; return v <
       await wait(every * 1.6);
       const s = await p.evaluate(state);
       const pedidas = p._req.filter((r) => /\/img\//.test(r.url)).map((r) => r.url);
-      const otras = await p.evaluate(() => [...document.querySelectorAll(".print--hero img")].slice(1).map((i) => (i.dataset.src || "").match(/img\/([a-z0-9-]+?)-\d+w-/)?.[1]).filter(Boolean));
+      const otras = await p.evaluate(() => [...document.querySelectorAll(".print--hero img")].slice(1).map((i) => (i.dataset.src || "").match(/img\/(?:[a-z0-9-]+\/)?([a-z0-9-]+?)-\d+w-/)?.[1]).filter(Boolean));
       const z = await p.evaluate(zoom), o = await p.evaluate(cortinas);
       ok("rotación con movimiento reducido: queda quieta en la primera, sin zoom, y las otras no se bajan",
-        activa(s) === 0 && sana(s) && z === "ninguno" && o && s.slice(1).every((x) => !x.bajada) && otras.length === s.length - 1 && !pedidas.some((u) => otras.some((o) => u.includes("/img/" + o + "-"))), JSON.stringify({ s, otras, zoom: z, diafragmaAbierto: o }));
+        activa(s) === 0 && sana(s) && z === "ninguno" && o && s.slice(1).every((x) => !x.bajada) && otras.length === s.length - 1 && !pedidas.some((u) => otras.some((o) => u.includes("/" + o + "-"))), JSON.stringify({ s, otras, zoom: z, diafragmaAbierto: o }));
       await p.close();
     }
     {

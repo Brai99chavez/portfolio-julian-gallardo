@@ -34,20 +34,25 @@
 /* La carpeta con el material original de Julián (no se mueve ni se publica). */
 const SOURCE = "1 CARPETA PARA BRAI";
 
-/* Carpetas. Se busca por el comienzo del nombre, a cualquier profundidad.
-   «./» = carpeta de este proyecto (los fotogramas de YouTube que baja npm run youtube). */
+/* Carpetas: nombre corto → RUTA EXACTA (la que empieza con «./» es relativa a este proyecto).
+   Antes se buscaban por el comienzo del nombre; con carpetas nuevas que se agregan solas eso daba 2 coincidencias y rompía todo.
+   Las carpetas NUEVAS que aparecen en «1 CARPETA PARA BRAI» no se declaran acá: se detectan solas (scripts/galeria.js, npm run fotos). */
 const GROUPS = {
-  vivo:     "fotos/EVENTOS",
-  moda:     "fotos/MODA",
-  producto: "fotos/FOTO PRODUCTO",
-  books:    "fotos/BOOKS",
-  boda:     "fotos/XV Y CASAMIENTOS",
-  aire:     "fotos/AIRE LIBRE",
-  reels:    "filmmaking/reels",
+  vivo:     "./1 CARPETA PARA BRAI/fotos/EVENTOS-sHOWS",
+  moda:     "./1 CARPETA PARA BRAI/fotos/MODA FTS DE ESTUDIO",
+  producto: "./1 CARPETA PARA BRAI/fotos/FOTO PRODUCTO",
+  books:    "./1 CARPETA PARA BRAI/fotos/BOOKS",
+  boda:     "./1 CARPETA PARA BRAI/fotos/XV Y CASAMIENTOS",
+  aire:     "./1 CARPETA PARA BRAI/fotos/AIRE LIBRE",
+  reels:    "./1 CARPETA PARA BRAI/filmmaking/reels",
   yt:       "./_fuentes/youtube",
   fv:       "./_fuentes/video",
-  julian:   "julian",                    // sus fotos de perfil (Braian, 20/10)
+  julian:   "./1 CARPETA PARA BRAI/julian",   // sus fotos de perfil (Braian, 20/10)
 };
+/* Subcarpeta de assets/img/ donde queda la salida optimizada de cada grupo (todo lo demás: el nombre del grupo). */
+const DIRS = { vivo: "en-vivo", moda: "moda", producto: "producto", books: "books", boda: "xv-y-casamientos", aire: "aire-libre", julian: "perfil", yt: "videoclips" };
+/* Dónde crea `npm run serie` una carpeta nueva (dentro de SOURCE). */
+const NEW_SERIES_DIR = "fotos";
 
 const SITE = {
   name: "Julián Gallardo",
@@ -387,6 +392,28 @@ for (const p of PROJECTS) {
   p.frames = p.frames.map(realId);
   if (SERIES[p.slug]) { const shown = new Set(p.frames); p.more = SERIES[p.slug].map((x) => realId(x.id)).filter((id) => !shown.has(id)); }
 }
+/* ---------- fotos nuevas y carpetas nuevas, sin tocar código (npm run fotos; ver scripts/galeria.js y «1 CARPETA PARA BRAI/LEEME.txt») ----------
+   · una foto nueva en una carpeta que ya existe se suma al trabajo que más fotos de esa carpeta tiene (al desplegable «Ver las N fotos más»);
+   · una carpeta nueva en «fotos/» arma sola un trabajo nuevo de fotografía. Lo que ya estaba al empezar no se toca (fotos-vistas.json). */
+const { discover } = require("./scripts/galeria.js");
+const { resolveDir } = require("./scripts/lib.js");
+const ownerOf = (g) => {
+  let best = null, top = -1;
+  for (const p of PROJECTS) { const n = [...p.frames, ...(p.more || [])].filter((id) => IMAGES[id] && IMAGES[id].g === g).length; if (n > top) { top = n; best = p.slug; } }
+  return best;
+};
+const FOUND = discover({ root: __dirname, source: SOURCE, groups: GROUPS, images: IMAGES, ownerOf, resolveDir, defaults: { cat: "foto", kind: "Fotografía" }, takenSlugs: PROJECTS.map((p) => p.slug) });
+Object.assign(GROUPS, FOUND.groups);
+for (const x of FOUND.photos) IMAGES[x.id] = { g: x.g, f: x.f, alt: x.alt, ...(x.genericAlt ? { genericAlt: true } : {}) };
+for (const x of FOUND.photos) {
+  if (FOUND.projects.some((p) => p.slug === x.project)) continue;          // las de un trabajo nuevo ya vienen en su frames/more
+  const p = PROJECTS.find((q) => q.slug === x.project);
+  if (!p) throw new Error(`La foto nueva ${x.f} va al trabajo «${x.project}», que no existe (revisá serie.json → destino)`);
+  (p.more = p.more || []).push(x.id);
+}
+PROJECTS.push(...FOUND.projects);
+for (const im of Object.values(IMAGES)) im.dir = DIRS[im.g] || im.g;
+
 const mainImages = new Set([...HERO.images.map((h) => h.img), ...PROJECTS.flatMap((p) => p.frames), ...FEATURED.flatMap((f) => [f.cover, ...(f.flip || [])])]);
 for (const p of PROJECTS) for (const id of p.more || []) if (!mainImages.has(id)) IMAGES[id].lite = true;
 
@@ -468,4 +495,4 @@ const FOOTER = {
   rights: "Los videoclips son de sus artistas y las marcas, de sus dueños.",
 };
 
-module.exports = { SOURCE, GROUPS, SITE, HERO, SHOWREEL, STRIP, IMAGES, VIDEOS, CLIPS, REELS, CATEGORIES, PROJECTS, FEATURED, ABOUT, TIMELINE, SERVICES, TOOLS, CONTACT, FOOTER };
+module.exports = { SOURCE, NEW_SERIES_DIR, FOUND, GROUPS, SITE, HERO, SHOWREEL, STRIP, IMAGES, VIDEOS, CLIPS, REELS, CATEGORIES, PROJECTS, FEATURED, ABOUT, TIMELINE, SERVICES, TOOLS, CONTACT, FOOTER };

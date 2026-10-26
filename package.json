@@ -14,7 +14,9 @@
     "zip": "node scripts/zip-dist.js",
     "youtube": "node scripts/youtube-frames.js",
     "check": "node scripts/check-dist.js",
-    "showreel": "node scripts/showreel.js"
+    "showreel": "node scripts/showreel.js",
+    "fotos": "node scripts/fotos.js",
+    "serie": "node scripts/fotos.js --nueva"
   },
   "license": "UNLICENSED",
   "dependencies": {

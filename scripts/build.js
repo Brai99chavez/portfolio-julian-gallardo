@@ -155,7 +155,7 @@ fs.writeFileSync(path.join(DIST, "assets", "js", "app.js"), js);
 // imágenes: solo las variantes de las imágenes que alguna página usa
 const keep = new Set([...usedImages].flatMap((id) => M[id].variants.map((v) => v.file)));
 let imgBytes = 0;
-for (const f of keep) { fs.copyFileSync(path.join(ROOT, "assets", "img", f), path.join(DIST, "assets", "img", f)); imgBytes += fs.statSync(path.join(ROOT, "assets", "img", f)).size; }
+for (const f of keep) { fs.mkdirSync(path.dirname(path.join(DIST, "assets", "img", f)), { recursive: true }); fs.copyFileSync(path.join(ROOT, "assets", "img", f), path.join(DIST, "assets", "img", f)); imgBytes += fs.statSync(path.join(ROOT, "assets", "img", f)).size; }
 const unused = Object.keys(C.IMAGES).filter((id) => !usedImages.has(id));
 if (unused.length) console.warn(`  ⚠ ${unused.length} imagen(es) declaradas en IMAGES que ninguna página usa (no se publican): ${unused.join(", ")}`);
 for (const f of fs.readdirSync(path.join(ROOT, "assets", "brand"))) fs.copyFileSync(path.join(ROOT, "assets", "brand", f), path.join(DIST, "assets", "brand", f));

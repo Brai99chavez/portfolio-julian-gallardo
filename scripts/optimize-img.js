@@ -25,6 +25,8 @@
        comprimir): avisa por debajo de 34 dB y FALLA por debajo de 30 dB.
      - nombre con hash del contenido: <id>-<ancho>w-<hash>.webp
        (por eso se puede cachear un año sin riesgo de ver versiones viejas).
+   Las salidas se ordenan en subcarpetas por trabajo: assets/img/<carpeta>/<id>-<ancho>w-<hash>.webp (IMAGES[id].dir en content.js).
+   Con MISSING=1 (npm run fotos) solo procesa lo nuevo o cambiado y limpia lo que ya no está.
    Escribe assets/img/manifest.json, que usa el build.
    Los originales de contenido/ no se tocan.
    ============================================================= */
@@ -42,12 +44,25 @@ const OUT = path.join(ROOT, "assets", "img");
 const Q = parseInt(process.env.Q || "90", 10);
 const Q_LOW = 95;
 let ONLY = process.env.ONLY ? new Set(process.env.ONLY.split(",")) : null;
-// MISSING=1: solo las imágenes que todavía no están en el manifest (para sumar material sin rehacer todo)
+const subdir = (id) => IMAGES[id].dir || "";
+const walkFiles = (dir) => fs.existsSync(dir) ? fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walkFiles(path.join(dir, e.name)) : [path.join(dir, e.name)]) : [];
+const statOf = (id) => { const st = fs.statSync(resolveImage(SRC, GROUPS, IMAGES[id])); return { size: st.size, mtime: Math.round(st.mtimeMs) }; };
 if (process.env.MISSING) {
   const mp = path.join(OUT, "manifest.json");
   const have = fs.existsSync(mp) ? JSON.parse(fs.readFileSync(mp, "utf8")) : {};
-  ONLY = new Set(Object.keys(IMAGES).filter((id) => !have[id] || (!!have[id].lite) !== !!IMAGES[id].lite));
-  if (!ONLY.size) { console.log("\n✓ No hay imágenes nuevas para optimizar\n"); process.exit(0); }
+  // 1) lo que ya no está en content.js (se borró la foto o la carpeta): se limpian sus archivos y su entrada
+  const gone = Object.keys(have).filter((id) => !IMAGES[id]);
+  for (const id of gone) { for (const v of have[id].variants) fs.rmSync(path.join(OUT, v.file), { force: true }); delete have[id]; }
+  for (const d of fs.readdirSync(OUT, { withFileTypes: true })) if (d.isDirectory() && !fs.readdirSync(path.join(OUT, d.name)).length) fs.rmdirSync(path.join(OUT, d.name));   // carpetas de series que quedaron vacías
+  if (gone.length) { fs.writeFileSync(mp, JSON.stringify(have, null, 1)); console.log(`\n  ✂ Se limpiaron ${gone.length} imagen(es) que ya no están: ${gone.join(", ")}`); }
+  // 2) lo nuevo, lo que cambió de carpeta o de «lite», y lo que cambió el ARCHIVO ORIGINAL (tamaño o fecha)
+  const inDir = (id) => have[id].variants.every((v) => (subdir(id) ? v.file.startsWith(subdir(id) + "/") : !v.file.includes("/")));
+  ONLY = new Set(Object.keys(IMAGES).filter((id) => {
+    if (!have[id] || (!!have[id].lite) !== !!IMAGES[id].lite || !inDir(id) || !have[id].src) return true;
+    const st = statOf(id);
+    return have[id].src.size !== st.size || have[id].src.mtime !== st.mtime;
+  }));
+  if (!ONLY.size) { console.log("\n✓ No hay imágenes nuevas ni cambiadas para optimizar\n"); process.exit(0); }
 }
 const PORTRAIT = { card: [540, 1080], big: 1440, zoom: 2160 };
 const LANDSCAPE = { card: [800, 1600], big: 2200, zoom: 2880 };
@@ -94,7 +109,7 @@ function psnr(a, b) {
   const manifestPath = path.join(OUT, "manifest.json");
   let manifest = {};
   if (ONLY && fs.existsSync(manifestPath)) manifest = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-  else for (const f of fs.readdirSync(OUT)) if (/\.(webp|json)$/.test(f)) fs.rmSync(path.join(OUT, f));
+  else for (const f of walkFiles(OUT)) if (/[.](webp|json)$/.test(f)) fs.rmSync(f);
 
   const ids = Object.keys(IMAGES).filter((id) => !ONLY || ONLY.has(id));
   if (ONLY) for (const id of ONLY) if (!IMAGES[id]) throw new Error(`ONLY: no existe la imagen "${id}"`);
@@ -119,7 +134,7 @@ function psnr(a, b) {
       // los ids solo llevan letras, números y guiones: el prefijo + "-<ancho>w-<hash8>.webp" identifica sus variantes
       // (y no confunde "sol-claqueta" con "sol-claqueta-2": después del id exige "-<dígitos>w-")
       const old = new RegExp("^" + id + "-[0-9]+w-[0-9a-f]{8}[.]webp$");
-      for (const f of fs.readdirSync(OUT)) if (old.test(f)) fs.rmSync(path.join(OUT, f));
+      for (const f of walkFiles(OUT)) if (old.test(path.basename(f))) fs.rmSync(f);   // también los de una carpeta anterior
     }
     const variants = [];
 
@@ -132,7 +147,8 @@ function psnr(a, b) {
         .webp({ quality: q, effort: 6, smartSubsample: true })
         .toBuffer({ resolveWithObject: true });
       const hash = crypto.createHash("sha1").update(data).digest("hex").slice(0, 8);
-      const name = `${id}-${info.width}w-${hash}.webp`;
+      const name = (subdir(id) ? subdir(id) + "/" : "") + `${id}-${info.width}w-${hash}.webp`;
+      fs.mkdirSync(path.dirname(path.join(OUT, name)), { recursive: true });
       fs.writeFileSync(path.join(OUT, name), data);
 
       // Instrumento 1: la salida NO trae EXIF ni XMP ni GPS
@@ -154,7 +170,8 @@ function psnr(a, b) {
     }
     // datos de la toma (texto que se muestra junto a la foto); la foto publicada no lleva EXIF
     const shot = readShot(meta.exif);
-    manifest[id] = { w: dw, h: dh, q, ...(shot ? { shot } : {}), ...(IMAGES[id].lite ? { lite: true } : {}), variants };
+    const st = fs.statSync(file);
+    manifest[id] = { w: dw, h: dh, q, src: { size: st.size, mtime: Math.round(st.mtimeMs) }, ...(shot ? { shot } : {}), ...(IMAGES[id].lite ? { lite: true } : {}), variants };
     console.log(`  ${id.padEnd(18)} ${String(dw + "×" + dh).padEnd(10)} q${q} → ` +
       variants.map((v) => `${v.w}w${v.role === "card" ? "" : "·" + v.role} ${kb(v.bytes)} ${v.db == null ? "  n/d" : v.db.toFixed(1) + "dB"}`).join("  ·  "));
   }

@@ -1,0 +1,9 @@
+ESTA CARPETA LA GENERA EL COMANDO «npm run fotos» (o «npm run optimize»). NO SE EDITA A MANO.
+
+Una subcarpeta por tipo de trabajo (en-vivo, moda, producto, books, xv-y-casamientos, aire-libre, perfil, videoclips y una por cada
+trabajo nuevo que se cargue en «1 CARPETA PARA BRAI/fotos»). Cada foto tiene varias medidas en WebP, con un código en el nombre:
+
+    <id>-<ancho>w-<código>.webp        p. ej.  en-vivo/vivo-humo-1440w-1a2b3c4d.webp
+
+manifest.json dice qué medidas tiene cada foto y de qué original salió; el build lo lee.
+Para sumar o sacar fotos: mirar «1 CARPETA PARA BRAI/LEEME.txt».
